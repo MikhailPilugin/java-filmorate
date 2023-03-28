@@ -3,6 +3,9 @@ package ru.yandex.practicum.filmorate.controller;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import java.time.Duration;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,13 +22,38 @@ public class FilmController {
 
     @PostMapping
     public void addFilm(@RequestBody Film film) {
-        filmMap.put(film.getId(), film);
+
+        LocalDate releaseDate = film.getReleaseDate();
+        LocalDate firstFilm = LocalDate.parse("1895-12-28");
+        boolean isAfter = releaseDate.isAfter(firstFilm);
+
+        String duration = film.getDuration().toString();
+        System.out.println(duration);
+
+
+
+        if (filmMap.size() == 0 && film.getName() != null && film.getDescription().length() <= 200 && isAfter
+        ) {
+            filmMap.put(film.getId(), film);
+
+        } else {
+            for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
+                if (integerFilmEntry.getValue().getId() == film.getId()) {
+                    System.out.println("Этот id уже занят");
+                } else {
+                    filmMap.put(film.getId(), film);
+                }
+            }
+        }
     }
 
     @PutMapping
     public void updateFilm(@RequestBody Film film) {
-        if (filmMap.containsValue(film.getId())) {
-            filmMap.put(film.getId(), film);
+
+        for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
+            if (integerFilmEntry.getValue().getId() == film.getId()) {
+                filmMap.replace(film.getId(), film);
+            }
         }
     }
 }

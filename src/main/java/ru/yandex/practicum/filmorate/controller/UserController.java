@@ -19,15 +19,28 @@ public class UserController {
 
     @PostMapping
     public void addUser(@RequestBody User user) {
-        userMap.put(user.getId(), user);
+
+        if (userMap.size() == 0) {
+            userMap.put(user.getId(), user);
+
+        } else {
+            for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
+                if (integerUserEntry.getValue().getId() == user.getId()) {
+                    System.out.println("Этот id уже занят");
+                } else {
+                    userMap.put(user.getId(), user);
+                }
+            }
+        }
     }
 
     @PutMapping
     public void updateUser(@RequestBody User user) {
 
-        if (userMap.containsValue(user.getId())) {
-            userMap.put(user.getId(), user);
+        for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
+            if (integerUserEntry.getValue().getId() == user.getId()) {
+                userMap.replace(user.getId(), user);
+            }
         }
     }
-
 }
