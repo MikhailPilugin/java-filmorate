@@ -25,7 +25,7 @@ public class UserController {
     }
 
     @PostMapping
-    public void addUser(@RequestBody User user) throws ValidationException {
+    public User addUser(@RequestBody User user) throws ValidationException {
 
         // проверка почты
         String email = user.getEmail();
@@ -78,6 +78,8 @@ public class UserController {
 
             throw new ValidationException("Ошибка данных при добавлении пользователя");
         }
+
+        return user;
     }
 
     @PutMapping
