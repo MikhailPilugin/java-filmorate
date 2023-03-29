@@ -27,16 +27,14 @@ public class FilmController {
         LocalDate firstFilm = LocalDate.parse("1895-12-28");
         boolean isAfter = releaseDate.isAfter(firstFilm);
 
-        String duration = film.getDuration().toString();
-        System.out.println(duration);
-
-
+        long duration = film.getDuration();
 
         if (filmMap.size() == 0 && film.getName() != null && film.getDescription().length() <= 200 && isAfter
-        ) {
+        && duration > 0) {
             filmMap.put(film.getId(), film);
 
-        } else {
+        } else if (film.getName() != null && film.getDescription().length() <= 200 && isAfter
+                && duration > 0){
             for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
                 if (integerFilmEntry.getValue().getId() == film.getId()) {
                     System.out.println("Этот id уже занят");
