@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -13,7 +14,10 @@ import java.util.Map;
 @RequestMapping("/users")
 public class UserController {
 
+    private final static Logger log = LoggerFactory.getLogger(UserController.class);
+
     Map<Integer, User> userMap = new HashMap<>();
+
 
     @GetMapping
     public Map<Integer, User> getUsers() {
@@ -51,6 +55,8 @@ public class UserController {
         && isLoginNotEmpty && isBirthDayBeforeToday) {
             userMap.put(user.getId(), user);
 
+            log.info("Добавлен новый пользователь: " + user.getLogin());
+
         // пользователи уже есть
         } else if (isEmailContainsAt && isEmailNotEmpty && !isLoginContainsSpace
                 && isLoginNotEmpty && isBirthDayBeforeToday) {
@@ -58,11 +64,18 @@ public class UserController {
             for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
                 if (integerUserEntry.getValue().getId() == user.getId()) {
                     System.out.println("Этот id уже занят");
+
+                    log.info("Попытка добавления пользователя с занятым id: логин "
+                            + user.getLogin() + " id " + user.getId());
                 } else {
                     userMap.put(user.getId(), user);
+
+                    log.info("Добавлен новый пользователь: " + user.getLogin());
                 }
             }
         } else {
+            log.info("Ошибка данных при добавлении пользователя");
+
             throw new ValidationException("Ошибка данных при добавлении пользователя");
         }
     }
@@ -73,6 +86,8 @@ public class UserController {
         for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
             if (integerUserEntry.getValue().getId() == user.getId()) {
                 userMap.replace(user.getId(), user);
+
+                log.info("Данные пользователя обновлены: " + user.getLogin());
             }
         }
     }

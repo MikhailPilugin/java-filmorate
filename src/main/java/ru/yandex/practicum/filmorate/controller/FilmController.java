@@ -1,13 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.time.Period;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +14,10 @@ import java.util.Map;
 @RequestMapping("/films")
 public class FilmController {
 
+    private final static Logger log = LoggerFactory.getLogger(FilmController.class);
+
     Map<Integer, Film> filmMap = new HashMap<>();
+
 
     @GetMapping
     public Map<Integer, Film> getFilms() {
@@ -53,11 +55,18 @@ public class FilmController {
             for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
                 if (integerFilmEntry.getValue().getId() == film.getId()) {
                     System.out.println("Этот id уже занят");
+
+                    log.info("Попытка добавить фильм с занятым id: название "
+                            + film.getName() + " id " + film.getId());
                 } else {
                     filmMap.put(film.getId(), film);
+
+                    log.info("Добавлен новый фильм: " + film.getName());
                 }
             }
         } else {
+            log.info("Ошибка данных при добавлении фильма");
+
             throw new ValidationException("Ошибка данных при добавлении фильма");
         }
     }
@@ -68,6 +77,8 @@ public class FilmController {
         for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
             if (integerFilmEntry.getValue().getId() == film.getId()) {
                 filmMap.replace(film.getId(), film);
+
+                log.info("Данные фильма обновлены: " + film.getName());
             }
         }
     }
