@@ -16,8 +16,7 @@ import java.util.Map;
 @Slf4j
 public class UserController {
 
-    Map<Integer, User> userMap = new HashMap<>();
-    
+    Map<Integer, User> userMap = new HashMap<>( );
     int id = 1;
 
     @GetMapping
@@ -51,7 +50,7 @@ public class UserController {
             log.info("Добавлен новый пользователь: " + user.getLogin());
 
         // пользователи уже есть
-        } else if (!isLoginContainsSpace && isLoginNotEmpty && isBirthDayBeforeToday) {
+        } else if ( !isLoginContainsSpace && isLoginNotEmpty && isBirthDayBeforeToday ) {
 
             for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
                 String userLogin = integerUserEntry.getValue().getLogin();
