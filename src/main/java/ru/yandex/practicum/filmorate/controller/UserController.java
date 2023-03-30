@@ -17,6 +17,7 @@ import java.util.Map;
 public class UserController {
 
     Map<Integer, User> userMap = new HashMap<>();
+    
     int id = 1;
 
     @GetMapping
