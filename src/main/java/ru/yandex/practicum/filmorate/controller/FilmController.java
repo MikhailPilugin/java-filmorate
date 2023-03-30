@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +15,8 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/films")
+@Slf4j
 public class FilmController {
-
-    private final static Logger log = LoggerFactory.getLogger(FilmController.class);
 
     Map<Integer, Film> filmMap = new HashMap<>();
     int id = 1;
@@ -40,7 +40,7 @@ public class FilmController {
             filmMap.put(id, film);
 
         // фильмы уже есть
-        } else if (isReleaseDateAfterFirstRelease){
+        } else if (isReleaseDateAfterFirstRelease) {
             for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
                 if (integerFilmEntry.getValue().getName() == film.getName()) {
                     System.out.println("Этот название уже занято");
