@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -11,13 +12,11 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
+@Slf4j
 public class UserController {
-
-    private final static Logger log = LoggerFactory.getLogger(UserController.class);
 
     Map<Integer, User> userMap = new HashMap<>();
     int id = 1;
@@ -69,13 +68,10 @@ public class UserController {
             userMap.put(user.getId(), user);
             log.info("Добавлен новый пользователь: " + user.getLogin());
 
-
         } else {
             log.info("Ошибка данных при добавлении пользователя");
-
             throw new ValidationException("Ошибка данных при добавлении пользователя");
         }
-
         return user;
     }
 
@@ -87,20 +83,12 @@ public class UserController {
         for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
             if (integerUserEntry.getValue().getId() == userId) {
                 userMap.put(userId, user);
+                log.info("Данные пользователя обновлены: " + user.getLogin());
             } else {
                 log.info("Попытка обновления данных несуществующего пользователя");
                 throw new ValidationException("Попытка обновления данных несуществующего пользователя");
             }
         }
-
-
-
-//                userMap.replace(user.getId(), user);
-//
-//                log.info("Данные пользователя обновлены: " + user.getLogin());
-//
-
-
         return user;
     }
 }
