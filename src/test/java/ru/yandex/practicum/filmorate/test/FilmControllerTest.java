@@ -20,6 +20,6 @@ public class FilmControllerTest {
     @Test
     public void getFilms() throws Exception {
         assertThat(this.restTemplate.getForObject("http://localhost:" + port + "/films", String.class))
-                .contains("{}");
+                .contains("[]");
     }
 }

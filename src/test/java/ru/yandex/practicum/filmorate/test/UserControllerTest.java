@@ -22,6 +22,6 @@ public class UserControllerTest {
     @Test
     public void getUsers() throws Exception {
         this.mockMvc.perform(get("/users")).andDo(print()).andExpect(status().isOk())
-                .andExpect(content().string(containsString("{}")));
+                .andExpect(content().string(containsString("[]")));
     }
 }
