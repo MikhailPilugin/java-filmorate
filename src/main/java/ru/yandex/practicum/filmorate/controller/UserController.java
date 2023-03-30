@@ -6,9 +6,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
@@ -17,21 +20,15 @@ public class UserController {
     private final static Logger log = LoggerFactory.getLogger(UserController.class);
 
     Map<Integer, User> userMap = new HashMap<>();
-
+    int id = 1;
 
     @GetMapping
-    public Map<Integer, User> getUsers() {
-        return userMap;
+    public Collection<?> getUsers() {
+        return userMap.values();
     }
 
     @PostMapping
-    public User addUser(@RequestBody User user) throws ValidationException {
-
-        // проверка почты
-        String email = user.getEmail();
-        String commerceAt = "@";
-        boolean isEmailContainsAt = email.contains(commerceAt);
-        boolean isEmailNotEmpty = !email.isEmpty();
+    public User addUser(@RequestBody @Valid User user) throws ValidationException {
 
         // проверка логина
         String login = user.getLogin();
@@ -40,9 +37,7 @@ public class UserController {
         boolean isLoginNotEmpty = !login.isEmpty();
 
         // проверка имени - если имя не добавлено, подставляем логин в имя
-        String name = user.getName();
-
-        if (name.isEmpty()) {
+        if (user.getName() == null) {
             user.setName(user.getLogin());
         }
 
@@ -51,28 +46,30 @@ public class UserController {
         boolean isBirthDayBeforeToday = user.getBirthday().isBefore(today);
 
         // если пользователей ещё нет - добавляем первого
-        if (userMap.size() == 0 && isEmailContainsAt && isEmailNotEmpty && !isLoginContainsSpace
-        && isLoginNotEmpty && isBirthDayBeforeToday) {
-            userMap.put(user.getId(), user);
+        if (userMap.size() == 0 && !isLoginContainsSpace && isLoginNotEmpty && isBirthDayBeforeToday) {
+            user.setId(id);
+            userMap.put(id, user);
 
             log.info("Добавлен новый пользователь: " + user.getLogin());
 
         // пользователи уже есть
-        } else if (isEmailContainsAt && isEmailNotEmpty && !isLoginContainsSpace
-                && isLoginNotEmpty && isBirthDayBeforeToday) {
+        } else if ( !isLoginContainsSpace && isLoginNotEmpty && isBirthDayBeforeToday) {
 
             for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
-                if (integerUserEntry.getValue().getId() == user.getId()) {
-                    System.out.println("Этот id уже занят");
+                String userLogin = integerUserEntry.getValue().getLogin();
 
-                    log.info("Попытка добавления пользователя с занятым id: логин "
-                            + user.getLogin() + " id " + user.getId());
-                } else {
-                    userMap.put(user.getId(), user);
-
-                    log.info("Добавлен новый пользователь: " + user.getLogin());
+                if (user.getLogin().equals(userLogin)) {
+                    log.info("Попытка добавления пользователя с занятым логином: " + user.getLogin());
+                    throw new ValidationException("Этот login уже занят");
                 }
             }
+
+            user.setId(++id);
+
+            userMap.put(user.getId(), user);
+            log.info("Добавлен новый пользователь: " + user.getLogin());
+
+
         } else {
             log.info("Ошибка данных при добавлении пользователя");
 
@@ -83,14 +80,27 @@ public class UserController {
     }
 
     @PutMapping
-    public void updateUser(@RequestBody User user) {
+    public User updateUser(@RequestBody @Valid User user) throws ValidationException {
+
+        int userId = user.getId();
 
         for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
-            if (integerUserEntry.getValue().getId() == user.getId()) {
-                userMap.replace(user.getId(), user);
-
-                log.info("Данные пользователя обновлены: " + user.getLogin());
+            if (integerUserEntry.getValue().getId() == userId) {
+                userMap.put(userId, user);
+            } else {
+                log.info("Попытка обновления данных несуществующего пользователя");
+                throw new ValidationException("Попытка обновления данных несуществующего пользователя");
             }
         }
+
+
+
+//                userMap.replace(user.getId(), user);
+//
+//                log.info("Данные пользователя обновлены: " + user.getLogin());
+//
+
+
+        return user;
     }
 }

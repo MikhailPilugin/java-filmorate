@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,15 +26,15 @@ public class FilmController {
     }
 
     @PostMapping
-    public void addFilm(@RequestBody Film film) throws ValidationException {
+    public void addFilm(@RequestBody @Valid Film film) throws ValidationException {
 
         // проверка названия
         String name = film.getName();
         boolean isNameNotEmpty = !name.isEmpty();
 
-        // проверка максимальной длины описания - 200 символов
-        String description = film.getDescription();
-        boolean isDescriptionNormalLength = description.length() <= 200;
+//        // проверка максимальной длины описания - 200 символов
+//        String description = film.getDescription();
+//        boolean isDescriptionNormalLength = description.length() <= 200;
 
         // проверка даты релиза - не раньше 28 декабря 1895 года
         LocalDate releaseDate = film.getReleaseDate();
@@ -45,20 +46,22 @@ public class FilmController {
         boolean isDurationPositive = duration > 0;
 
         // если фильмов ещё нет - добавляем первый
-        if (filmMap.size() == 0 && isNameNotEmpty && isDescriptionNormalLength && isReleaseDateAfterFirstRelease
+        if (filmMap.size() == 0 && isNameNotEmpty && isReleaseDateAfterFirstRelease
         && isDurationPositive) {
-            filmMap.put(film.getId(), film);
+            filmMap.put(1, film);
 
         // фильмы уже есть
-        } else if (isNameNotEmpty && isDescriptionNormalLength && isReleaseDateAfterFirstRelease
+        } else if (isNameNotEmpty && isReleaseDateAfterFirstRelease
                 && isDurationPositive){
             for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
-                if (integerFilmEntry.getValue().getId() == film.getId()) {
-                    System.out.println("Этот id уже занят");
+                if (integerFilmEntry.getValue().getName() == film.getName()) {
+                    System.out.println("Этот название уже занято");
 
-                    log.info("Попытка добавить фильм с занятым id: название "
-                            + film.getName() + " id " + film.getId());
+                    log.info("Попытка добавить занятое название фильма: " + film.getName());
                 } else {
+                    int id = filmMap.size();
+                    film.setId(++id);
+
                     filmMap.put(film.getId(), film);
 
                     log.info("Добавлен новый фильм: " + film.getName());
@@ -72,7 +75,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public void updateFilm(@RequestBody Film film) {
+    public Film updateFilm(@RequestBody @Valid Film film) {
 
         for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
             if (integerFilmEntry.getValue().getId() == film.getId()) {
@@ -81,5 +84,6 @@ public class FilmController {
                 log.info("Данные фильма обновлены: " + film.getName());
             }
         }
+        return film;
     }
 }
