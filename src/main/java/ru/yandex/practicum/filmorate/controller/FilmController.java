@@ -26,8 +26,7 @@ public class FilmController {
 
     @PostMapping
     public Film addFilm(@RequestBody @Valid Film film) throws ValidationException {
-
-        // проверка даты релиза - не раньше 28 декабря 1895 года
+        
         LocalDate releaseDate = film.getReleaseDate();
         LocalDate firstReleaseFilm = LocalDate.of(1895, 12, 28);
         boolean isReleaseDateAfterFirstRelease = releaseDate.isAfter(firstReleaseFilm);
@@ -52,7 +51,8 @@ public class FilmController {
                     log.info("Добавлен новый фильм: " + film.getName());
                 }
             }
-        } else {
+        }
+        else {
             log.info("Ошибка данных при добавлении фильма");
 
             throw new ValidationException("Ошибка данных при добавлении фильма");
