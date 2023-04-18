@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class FilmService {
@@ -15,11 +16,11 @@ public class FilmService {
         this.filmMap = filmMap;
     }
 
-    public Film addLike(long userId, long filmId) {
+    public Film addLike(long id, long userId) {
         Film film;
 
         for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
-            if (integerFilmEntry.getKey() == filmId) {
+            if (integerFilmEntry.getKey() == id) {
                 film = integerFilmEntry.getValue();
                 Set<Long> likes = film.getLikes();
                 likes.add(userId);
@@ -28,14 +29,14 @@ public class FilmService {
             }
         }
         
-        return filmMap.get(filmId);
+        return filmMap.get(id);
     }
 
-    public Film delLike(long userId, long filmId) {
+    public Film delLike(long id, long userId) {
         Film film;
 
         for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
-            if (integerFilmEntry.getKey() == filmId) {
+            if (integerFilmEntry.getKey() == id) {
                 film = integerFilmEntry.getValue();
                 Set<Long> likes = film.getLikes();
                 likes.remove(userId);
@@ -44,28 +45,29 @@ public class FilmService {
             }
         }
         
-        return filmMap.get(filmId);
+        return filmMap.get(id);
     }
 
-    public TreeMap<Integer, Integer> getPopularFilms() {
-        TreeMap<Integer, Integer> likes = new TreeMap<>(new DescOrder());
+    public List<Integer> getPopularFilms(Long count) {
+        List<Integer> allLikes = null;
+        List<Integer> sortedLikes = null;
 
-        for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
-            likes.put(integerFilmEntry.getKey(), integerFilmEntry.getValue().getLikes().size());
-        }
+            for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
+                allLikes.add(integerFilmEntry.getValue().getLikes().size());
+            }
 
-        for (int i = 0; i < 10; i++) {
-            System.out.println(likes.get(i));
-        }
-        
-        return likes;
-    }
-}
+            if (count == null) {
+                for (int i = 0; i < 10; i++) {
+                    sortedLikes.add(allLikes.get(i));
+                }
+            } else {
+                for (int i = 0; i < count; i++) {
+                    sortedLikes.add(allLikes.get(i));
+                }
+            }
 
-class DescOrder implements Comparator<Integer> {
+        Collections.reverse(sortedLikes);
 
-    @Override
-    public int compare(Integer o1, Integer o2) {
-        return o2.compareTo(o1);
+            return sortedLikes;
     }
 }

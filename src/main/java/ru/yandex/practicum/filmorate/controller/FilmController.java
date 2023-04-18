@@ -41,18 +41,18 @@ public class FilmController {
         return inMemoryFilmStorage.deleteFilm(film);
     }
 
-    @PutMapping
-    public Film addLike(long userId, long filmId) {
-        return inMemoryFilmStorage.filmService.addLike(userId, filmId);
+    @PutMapping("/{id}/like/{userId}")
+    public Film addLike(@PathVariable long id, long userId) {
+        return inMemoryFilmStorage.filmService.addLike(id, userId);
     }
 
-    @DeleteMapping
-    public Film delLike(long userId, long filmId) {
-        return inMemoryFilmStorage.filmService.delLike(userId, filmId);
+    @DeleteMapping("/{id}/like/{userId}")
+    public Film delLike(@PathVariable long id, long userId) {
+        return inMemoryFilmStorage.filmService.delLike(id, userId);
     }
 
-    @GetMapping
-    public TreeMap<Integer, Integer> getPopularFilms() {
-        return inMemoryFilmStorage.filmService.getPopularFilms();
+    @GetMapping("/popular")
+    public List<Integer> getPopularFilms(@RequestParam(required = false) Long count) {
+        return inMemoryFilmStorage.filmService.getPopularFilms(count);
     }
 }

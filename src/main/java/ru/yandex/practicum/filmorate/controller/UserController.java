@@ -27,6 +27,11 @@ public class UserController {
         return inMemoryUserStorage.getUsers();
     }
 
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable long id) {
+        return inMemoryUserStorage.getUsers().get(id);
+    }
+
     @PostMapping
     public User addUser(@RequestBody @Valid User user) throws ValidationException {
         return inMemoryUserStorage.addUser(user);
@@ -42,18 +47,23 @@ public class UserController {
         return inMemoryUserStorage.deleteUser(user);
     }
 
-    @PutMapping
-    public User addFriend(long id, long friendId) {
-        return inMemoryUserStorage.userService.addFriend(id, friendId);
+    @PutMapping("/{id}/friends/{otherId}")
+    public User addFriend(@PathVariable long id, long otherId) {
+        return inMemoryUserStorage.userService.addFriend(id, otherId);
     }
 
-    @DeleteMapping
-    public User delFriend(long id, long friendId) {
-        return inMemoryUserStorage.userService.delFriend(id, friendId);
+    @DeleteMapping("/{id}/friends/{otherId}")
+    public User delFriend(@PathVariable long id, long otherId) {
+        return inMemoryUserStorage.userService.delFriend(id, otherId);
     }
 
-    @GetMapping
-    public Set<Long> getMutualFriends(long id) {
-        return inMemoryUserStorage.userService.getMutualFriends(id);
+    @GetMapping("/{id}/friends")
+    public Set<Long> getFriends(@PathVariable long id) {
+        return inMemoryUserStorage.userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public Set<Long> getCommonFriends(@PathVariable long id, long otherId) {
+        return inMemoryUserStorage.userService.getCommonFriends(id, otherId);
     }
 }
