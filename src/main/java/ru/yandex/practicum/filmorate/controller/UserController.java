@@ -1,22 +1,21 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
     private InMemoryUserStorage inMemoryUserStorage;
+    private UserService userService;
 
     @Autowired
     public UserController(InMemoryUserStorage inMemoryUserStorage) {
@@ -41,5 +40,20 @@ public class UserController {
     @DeleteMapping
     public User deleteUser(@RequestBody @Valid User user) throws ValidationException {
         return inMemoryUserStorage.deleteUser(user);
+    }
+
+    @PutMapping
+    public User addFriend(long id, long friendId) {
+        return inMemoryUserStorage.userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping
+    public User delFriend(long id, long friendId) {
+        return inMemoryUserStorage.userService.delFriend(id, friendId);
+    }
+
+    @GetMapping
+    public Set<Long> getMutualFriends(long id) {
+        return inMemoryUserStorage.userService.getMutualFriends(id);
     }
 }

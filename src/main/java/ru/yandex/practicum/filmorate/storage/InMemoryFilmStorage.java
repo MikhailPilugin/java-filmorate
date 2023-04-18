@@ -1,23 +1,29 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
-    private Map<Integer, Film> filmMap = new HashMap<>();
+    public FilmService filmService;
     private int id = 1;
+
+    @Autowired
+    public InMemoryFilmStorage(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @Override
     public Map<Integer, Film> getFilms() {
-        return filmMap;
+        return filmService.filmMap;
     }
 
     @Override
@@ -26,12 +32,12 @@ public class InMemoryFilmStorage implements FilmStorage {
         LocalDate firstReleaseFilm = LocalDate.of(1895, 12, 28);
         boolean isReleaseDateAfterFirstRelease = releaseDate.isAfter(firstReleaseFilm);
 
-        if (filmMap.size() == 0 && isReleaseDateAfterFirstRelease) {
+        if (filmService.filmMap.size() == 0 && isReleaseDateAfterFirstRelease) {
             film.setId(id);
-            filmMap.put(id, film);
+            filmService.filmMap.put(id, film);
 
         } else if (isReleaseDateAfterFirstRelease) {
-            for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
+            for (Map.Entry<Integer, Film> integerFilmEntry : filmService.filmMap.entrySet()) {
                 if (integerFilmEntry.getValue().getName() == film.getName()) {
                     System.out.println("Этот название уже занято");
 
@@ -39,7 +45,7 @@ public class InMemoryFilmStorage implements FilmStorage {
                 } else {
                     film.setId(++id);
 
-                    filmMap.put(film.getId(), film);
+                    filmService.filmMap.put(film.getId(), film);
 
                     log.info("Добавлен новый фильм: " + film.getName());
                 }
@@ -56,9 +62,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film updateFilm(Film film) throws ValidationException {
         int filmId = film.getId();
 
-        for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
+        for (Map.Entry<Integer, Film> integerFilmEntry : filmService.filmMap.entrySet()) {
             if (integerFilmEntry.getValue().getId() == filmId) {
-                filmMap.replace(film.getId(), film);
+                filmService.filmMap.replace(film.getId(), film);
 
                 log.info("Данные фильма обновлены: " + film.getName());
             } else {
@@ -73,9 +79,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film deleteFilm(Film film) throws ValidationException {
         int filmId = film.getId();
 
-        for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
+        for (Map.Entry<Integer, Film> integerFilmEntry : filmService.filmMap.entrySet()) {
             if (integerFilmEntry.getValue().getId() == filmId) {
-                filmMap.remove(film.getId(), film);
+                filmService.filmMap.remove(film.getId(), film);
 
                 log.info("Удаление фильма из списка: " + film.getName());
             } else {

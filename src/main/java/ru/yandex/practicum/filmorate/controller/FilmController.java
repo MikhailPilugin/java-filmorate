@@ -9,9 +9,7 @@ import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/films")
@@ -41,5 +39,20 @@ public class FilmController {
     @DeleteMapping
     public Film deleteFilm(@RequestBody @Valid Film film) throws ValidationException {
         return inMemoryFilmStorage.deleteFilm(film);
+    }
+
+    @PutMapping
+    public Film addLike(long userId, long filmId) {
+        return inMemoryFilmStorage.filmService.addLike(userId, filmId);
+    }
+
+    @DeleteMapping
+    public Film delLike(long userId, long filmId) {
+        return inMemoryFilmStorage.filmService.delLike(userId, filmId);
+    }
+
+    @GetMapping
+    public TreeMap<Integer, Integer> getPopularFilms() {
+        return inMemoryFilmStorage.filmService.getPopularFilms();
     }
 }

@@ -1,23 +1,29 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.Map;
 
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    private Map<Integer, User> userMap = new HashMap<>();
+    public UserService userService;
     private int id = 1;
+
+    @Autowired
+    public InMemoryUserStorage(UserService userService) {
+        this.userService = userService;
+    }
 
     @Override
     public Map<Integer, User> getUsers() {
-        return userMap;
+        return userService.userMap;
     }
 
     @Override
@@ -38,16 +44,16 @@ public class InMemoryUserStorage implements UserStorage {
         boolean isBirthDayBeforeToday = user.getBirthday().isBefore(today);
 
         // если пользователей ещё нет - добавляем первого
-        if (userMap.size() == 0 && !isLoginContainsSpace && isLoginNotEmpty && isBirthDayBeforeToday) {
+        if (userService.userMap.size() == 0 && !isLoginContainsSpace && isLoginNotEmpty && isBirthDayBeforeToday) {
             user.setId(id);
-            userMap.put(id, user);
+            userService.userMap.put(id, user);
 
             log.info("Добавлен новый пользователь: " + user.getLogin());
 
             // пользователи уже есть
         } else if (isLoginNotEmpty && isBirthDayBeforeToday && !isLoginContainsSpace) {
 
-            for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
+            for (Map.Entry<Integer, User> integerUserEntry : userService.userMap.entrySet()) {
                 String userLogin = integerUserEntry.getValue().getLogin();
 
                 if (user.getLogin().equals(userLogin)) {
@@ -58,7 +64,7 @@ public class InMemoryUserStorage implements UserStorage {
 
             user.setId(++id);
 
-            userMap.put(user.getId(), user);
+            userService.userMap.put(user.getId(), user);
             log.info("Добавлен новый пользователь: " + user.getLogin());
 
         } else {
@@ -72,9 +78,9 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(User user) throws ValidationException {
         int userId = user.getId();
 
-        for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
+        for (Map.Entry<Integer, User> integerUserEntry : userService.userMap.entrySet()) {
             if (integerUserEntry.getValue().getId() == userId) {
-                userMap.put(userId, user);
+                userService.userMap.put(userId, user);
                 log.info("Данные пользователя обновлены: " + user.getLogin());
             } else {
                 log.info("Попытка обновления данных несуществующего пользователя");
@@ -88,9 +94,9 @@ public class InMemoryUserStorage implements UserStorage {
     public User deleteUser(User user) throws ValidationException {
         int userId = user.getId();
 
-        for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
+        for (Map.Entry<Integer, User> integerUserEntry : userService.userMap.entrySet()) {
             if (integerUserEntry.getValue().getId() == userId) {
-                userMap.remove(userId, user);
+                userService.userMap.remove(userId, user);
                 log.info("Удаление пользователя из списка: " + user.getLogin());
             } else {
                 log.info("Попытка удаления несуществующего пользователя");
