@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -65,5 +66,23 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public Set<Long> getCommonFriends(@PathVariable long id, long otherId) {
         return inMemoryUserStorage.userService.getCommonFriends(id, otherId);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleValidationException(final ValidationException e) {
+        return Map.of("error", "Передан некорректный параметр");
+    }
+
+    @ExceptionHandler
+    //@ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNullPointerException(final NullPointerException e) {
+        return Map.of("error", "Отсутствует значение");
+    }
+
+    @ExceptionHandler
+   // @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handleRuntimeException(final RuntimeException e) {
+        return Map.of("error", "Ошибка в процессе выполнения приложения");
     }
 }
