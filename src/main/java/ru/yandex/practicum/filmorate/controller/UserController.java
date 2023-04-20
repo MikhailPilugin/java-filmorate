@@ -9,11 +9,11 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import javax.validation.Valid;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.util.*;
 
 @RestController
-@RequestMapping("/users")
+@ResponseBody
 public class UserController {
     private InMemoryUserStorage inMemoryUserStorage;
     private UserService userService;
@@ -23,66 +23,95 @@ public class UserController {
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
 
-    @GetMapping
-    public Map<Integer, User> getUsers() {
-        return inMemoryUserStorage.getUsers();
+    @GetMapping("/users")
+    public Collection<User> getUsers() {
+        return inMemoryUserStorage.userService.userMap.values();
     }
 
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable long id) {
-        return inMemoryUserStorage.getUsers().get(id);
+    @GetMapping("/users/{id}")
+    public User getUser(@PathVariable long id) throws ValidationException {
+        User user = null;
+        boolean userNotFound = true;
+
+        for (Map.Entry<Integer, User> integerUserEntry : inMemoryUserStorage.userService.userMap.entrySet()) {
+            if (integerUserEntry.getKey() == id) {
+                user = integerUserEntry.getValue();
+                userNotFound = false;
+            }
+        }
+
+        if (userNotFound) {
+            throw new IllegalArgumentException("Пользователь не найден");
+        }
+        return user;
     }
 
-    @PostMapping
+    @PostMapping("/users")
     public User addUser(@RequestBody @Valid User user) throws ValidationException {
         return inMemoryUserStorage.addUser(user);
     }
 
-    @PutMapping
+    @PutMapping("/users")
     public User updateUser(@RequestBody @Valid User user) throws ValidationException {
         return inMemoryUserStorage.updateUser(user);
     }
 
-    @DeleteMapping
+    @DeleteMapping("/users")
     public User deleteUser(@RequestBody @Valid User user) throws ValidationException {
         return inMemoryUserStorage.deleteUser(user);
     }
 
-    @PutMapping("/{id}/friends/{otherId}")
-    public User addFriend(@PathVariable long id, long otherId) {
-        return inMemoryUserStorage.userService.addFriend(id, otherId);
+
+
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        System.out.println(inMemoryUserStorage.userService.userMap.get(id));
+        System.out.println(inMemoryUserStorage.userService.userMap.get(friendId));
+
+        return inMemoryUserStorage.userService.addFriend(id, friendId);
     }
 
-    @DeleteMapping("/{id}/friends/{otherId}")
-    public User delFriend(@PathVariable long id, long otherId) {
-        return inMemoryUserStorage.userService.delFriend(id, otherId);
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public User delFriend(@PathVariable @Valid Long id, Long friendId) {
+        return inMemoryUserStorage.userService.delFriend(id, friendId);
     }
 
-    @GetMapping("/{id}/friends")
-    public Set<Long> getFriends(@PathVariable long id) {
-        return inMemoryUserStorage.userService.getFriends(id);
+    @GetMapping("/users/{id}/friends")
+    public Set<Long> getFriends(@PathVariable @Valid Long id) {
+        return inMemoryUserStorage.userService.userMap.get(id).getFriends();
     }
 
-    @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<Long> getCommonFriends(@PathVariable long id, long otherId) {
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public Set<Long> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
         return inMemoryUserStorage.userService.getCommonFriends(id, otherId);
     }
 
+
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleValidationException(final ValidationException e) {
+        return new ErrorResponse("error", "Передан некорректный параметр");
+    }
+
+    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//    @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handleValidationException(final ValidationException e) {
-        return Map.of("error", "Передан некорректный параметр");
+    public ErrorResponse handleRuntimeException(final RuntimeException e) {
+        return new ErrorResponse("error", e.getMessage());
     }
 
     @ExceptionHandler
-    //@ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handleNullPointerException(final NullPointerException e) {
-        return Map.of("error", "Отсутствует значение");
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInterruptedException(final NullPointerException e) {
+        return new ErrorResponse("error", e.getMessage());
     }
 
     @ExceptionHandler
-   // @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handleRuntimeException(final RuntimeException e) {
-        return Map.of("error", "Ошибка в процессе выполнения приложения");
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalArgumentException(final IllegalArgumentException e) {
+        return new ErrorResponse("error", e.getMessage());
     }
 }

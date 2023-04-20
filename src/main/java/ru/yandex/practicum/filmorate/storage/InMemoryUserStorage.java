@@ -35,7 +35,7 @@ public class InMemoryUserStorage implements UserStorage {
         boolean isLoginNotEmpty = !login.isEmpty();
 
         // проверка имени - если имя не добавлено, подставляем логин в имя
-        if (user.getName() == null) {
+        if (user.getName().isEmpty() || user.getName().isBlank() || user.getName() == null) {
             user.setName(user.getLogin());
         }
 
@@ -78,14 +78,16 @@ public class InMemoryUserStorage implements UserStorage {
     public User updateUser(User user) throws ValidationException {
         int userId = user.getId();
 
-        for (Map.Entry<Integer, User> integerUserEntry : userService.userMap.entrySet()) {
-            if (integerUserEntry.getValue().getId() == userId) {
-                userService.userMap.put(userId, user);
-                log.info("Данные пользователя обновлены: " + user.getLogin());
-            } else {
-                log.info("Попытка обновления данных несуществующего пользователя");
-                throw new ValidationException("Попытка обновления данных несуществующего пользователя");
+        if (userService.userMap.containsKey(userId)) {
+            for (Map.Entry<Integer, User> integerUserEntry : userService.userMap.entrySet()) {
+                if (integerUserEntry.getValue().getId() == userId) {
+                    userService.userMap.put(userId, user);
+                    log.info("Данные пользователя обновлены: " + user.getLogin());
+                }
             }
+        } else {
+            log.info("Попытка обновления данных несуществующего пользователя");
+            throw new ValidationException("Попытка обновления данных несуществующего пользователя");
         }
         return user;
     }

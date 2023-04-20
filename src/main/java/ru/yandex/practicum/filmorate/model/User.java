@@ -11,6 +11,7 @@ import java.util.Set;
 
 @Data
 public class User {
+//    @NotNull
     private int id;
 
     @Email

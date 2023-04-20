@@ -3,7 +3,9 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -11,53 +13,55 @@ import java.util.Set;
 @Service
 public class UserService {
     public Map<Integer, User> userMap;
+    public InMemoryUserStorage inMemoryUserStorage;
 
     @Autowired
     public UserService(Map<Integer, User> userMap) {
         this.userMap = userMap;
     }
 
-    public User addFriend(long id, long otherId) {
+    public User addFriend(long id, long friendId) {
         User user;
 
-        for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
-            if (integerUserEntry.getValue().getId() == id) {
-                user = integerUserEntry.getValue();
-                Set<Long> friends = user.getFriends();
-                friends.add(otherId);
-                user.setFriends(friends);
-                userMap.put(user.getId(), user);
+        if (userMap.containsKey(id) && userMap.containsKey(friendId)) {
+            for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
+                if (integerUserEntry.getValue().getId() == id) {
+                    user = integerUserEntry.getValue();
+                    Set<Long> friends = user.getFriends();
+                    friends.add(friendId);
+                    user.setFriends(friends);
+                    userMap.put(user.getId(), user);
+                }
+            }
+
+            for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
+                if (integerUserEntry.getValue().getId() == friendId) {
+                    user = integerUserEntry.getValue();
+                    Set<Long> friends = user.getFriends();
+                    friends.add(id);
+                    user.setFriends(friends);
+                    userMap.put(user.getId(), user);
+                }
             }
         }
-
-        for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
-            if (integerUserEntry.getValue().getId() == otherId) {
-                user = integerUserEntry.getValue();
-                Set<Long> friends = user.getFriends();
-                friends.add(id);
-                user.setFriends(friends);
-                userMap.put(user.getId(), user);
-            }
-        }
-
         return userMap.get(id);
     }
 
-    public User delFriend(long id, long otherId) {
+    public User delFriend(long id, long friendId) {
         User user;
 
         for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
             if (integerUserEntry.getValue().getId() == id) {
                 user = integerUserEntry.getValue();
                 Set<Long> friends = user.getFriends();
-                friends.remove(otherId);
+                friends.remove(friendId);
                 user.setFriends(friends);
                 userMap.put(user.getId(), user);
             }
         }
 
         for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
-            if (integerUserEntry.getValue().getId() == otherId) {
+            if (integerUserEntry.getValue().getId() == friendId) {
                 user = integerUserEntry.getValue();
                 Set<Long> friends = user.getFriends();
                 friends.remove(id);
@@ -69,19 +73,22 @@ public class UserService {
         return userMap.get(id);
     }
 
-    public Set<Long> getFriends(long id) {
+    public Set<Long> getFriends(Long id) {
         Set<Long> friends = userMap.get(id).getFriends();
         return friends;
     }
 
-    public Set<Long> getCommonFriends(long id, long otherId) {
+    public Set<Long> getCommonFriends(Long id, Long otherId) {
         User user;
-        Set<Long> friendsList = userMap.get(id).getFriends();
-        Set<Long> otherFriendsList = userMap.get(otherId).getFriends();
 
-        Set<Long> commonFriends = findCommonFriends(friendsList, otherFriendsList);
+        if (userMap.get(id) != null && userMap.get(otherId) != null) {
+            Set<Long> friendsList = userMap.get(id).getFriends();
+            Set<Long> otherFriendsList = userMap.get(otherId).getFriends();
 
-        return commonFriends;
+            Set<Long> commonFriends = findCommonFriends(friendsList, otherFriendsList);
+            return commonFriends;
+        }
+        return Collections.emptySet();
     }
 
     private Set<Long> findCommonFriends(Set<Long> first, Set<Long> second) {
