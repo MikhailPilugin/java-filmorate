@@ -7,11 +7,11 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Data
 public class User {
-//    @NotNull
     private int id;
 
     @Email
@@ -26,4 +26,10 @@ public class User {
     private LocalDate birthday;
 
     private Set<Long> friends;
+
+    public void setFriends(Long id) {
+        if (id != null) {
+            friends.add(id);
+        }
+    }
 }
