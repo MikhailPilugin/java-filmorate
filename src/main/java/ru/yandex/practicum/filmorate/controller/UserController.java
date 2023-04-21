@@ -110,8 +110,8 @@ public class UserController {
 
 //        inMemoryUserStorage.addUser(user1);
 
-        System.out.println("userMap afterAdd friend 1: " + InMemoryUserStorage.userList);
-        System.out.println("userMap afterAdd friend 1: " + InMemoryUserStorage.userList);
+//        System.out.println("userMap afterAdd friend 1: " + InMemoryUserStorage.userList);
+
 
 //        inMemoryUserStorage.addUser(user2);
 
@@ -120,13 +120,15 @@ public class UserController {
         userService.addFriend(id, friendId);
 
         System.out.println("userMap afterAdd friend 1: " + InMemoryUserStorage.userList);
-        System.out.println("userMap afterAdd friend 1: " + InMemoryUserStorage.userList);
 
-        System.out.println("userMap: " + InMemoryUserStorage.userList);
+//        System.out.println("userMap afterAdd friend 1: " + InMemoryUserStorage.userList);
+//        System.out.println("userMap afterAdd friend 1: " + InMemoryUserStorage.userList);
+//
+//        System.out.println("userMap: " + InMemoryUserStorage.userList);
 
 
-        User user = null;
-        Set<Long> userList = null;
+//        User user = null;
+//        List<Integer> userList = null;
 
 //        for (Map.Entry<Integer, User> integerUserEntry : InMemoryUserStorage.userMap.entrySet()) {
 //            if (integerUserEntry.getKey() == id) {
@@ -134,11 +136,11 @@ public class UserController {
 //            }
 //        }
 
-        System.out.println("user 1: " + user);
-        System.out.println("friends: " + user.getFriends());
-        userList = user.getFriends();
-
-        System.out.println("userList: " + userList);
+//        System.out.println("user 1: " + user);
+//        System.out.println("friends: " + user.getFriends());
+//        userList = user.getFriends();
+//
+//        System.out.println("userList: " + userList);
 
 
         /////////////////////////////////////////////////
@@ -184,13 +186,13 @@ public class UserController {
 //    }
 
     @GetMapping("/users/{id}/friends")
-    public Set<Long> getFriends(@PathVariable long id) {
+    public List<Integer> getFriends(@PathVariable int id) {
         System.out.println(InMemoryUserStorage.userList.get((int) id).getFriends());
         System.out.println(inMemoryUserStorage.userService.getFriend(id));
         System.out.println(InMemoryUserStorage.userList);
 
 
-        return InMemoryUserStorage.userList.get((int) id).getFriends();
+        return InMemoryUserStorage.userList.get(id).getFriends();
     }
 
 //    @GetMapping("/users/{id}/friends/common/{otherId}")

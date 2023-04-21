@@ -7,12 +7,17 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 @Data
 public class User {
     private int id;
+
+    public User() {
+        this.friends = new ArrayList<>();
+    }
 
     @Email
     @NotNull
@@ -25,10 +30,10 @@ public class User {
     private String name;
     private LocalDate birthday;
 
-    private Set<Long> friends;
+    private List<Integer> friends;
 
-    public void setFriends(Long id) {
-        if (id != null) {
+    public void setFriends(Integer id) {
+        if (id != null && !friends.contains(id)) {
             friends.add(id);
         }
     }
