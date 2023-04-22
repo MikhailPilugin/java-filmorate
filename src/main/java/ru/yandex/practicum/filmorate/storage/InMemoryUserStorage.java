@@ -8,15 +8,13 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Component
 @Slf4j
 public class InMemoryUserStorage implements UserStorage {
-    public static List<User> userList = new ArrayList<>();
+    public static Map<Integer, User> userMap = new HashMap<>();
 
     public UserService userService;
     private int id;
@@ -27,8 +25,26 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getUsers() {
-        return userList;
+    public Map<Integer, User> getUsers() {
+        return userMap;
+    }
+
+    @Override
+    public User getUserById(Integer id) {
+        boolean isUserNotFound = true;
+        User user = null;
+
+        for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
+            if (integerUserEntry.getValue().getId() == id) {
+                isUserNotFound = false;
+                user = integerUserEntry.getValue();
+            }
+        }
+
+        if (isUserNotFound) {
+            throw new IllegalArgumentException("User not found");
+        }
+        return user;
     }
 
     @Override
@@ -47,23 +63,24 @@ public class InMemoryUserStorage implements UserStorage {
         boolean isBirthDayBeforeToday = user.getBirthday().isBefore(today);
 
         // если пользователей ещё нет - добавляем первого
-        if (userList.isEmpty() && isBirthDayBeforeToday) {
+        if (userMap.isEmpty() && isBirthDayBeforeToday) {
             id = 1;
             user.setId(id);
-            userList.add(user);
+            userMap.put(0, user);
 
             log.info("Добавлен новый пользователь: " + user.getLogin());
 
             // пользователи уже есть
         } else if (isBirthDayBeforeToday) {
-            if (userList.contains(user)) {
+            if (userMap.containsValue(user)) {
                     log.info("Попытка добавления пользователя с занятым логином: " + user.getLogin());
                     throw new ValidationException("Этот login уже занят");
                 }
 
             id++;
             user.setId(id);
-            userList.add(user);
+            userMap.put(id-1, user);
+
             log.info("Добавлен новый пользователь: " + user.getLogin());
 
         } else {
@@ -75,21 +92,22 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) throws ValidationException {
-        int userId = user.getId();
-        int index = 0;
+        boolean isUserNotFound = true;
 
-        if (userList.contains(user)) {
-            for (int i = 0; i < userList.size(); i++) {
-                if (userList.get(i).getId() == user.getId()) {
-                    index = i;
-                }
+        for (int i = 0; i < userMap.size(); i++) {
+            if (userMap.get(i).getId() == user.getId()) {
+                userMap.replace(i, user);
+
+                log.info("The user data has updated: " + user.getLogin());
+                isUserNotFound = false;
+
+                return user;
             }
+        }
 
-            userList.set(index, user);
-            log.info("Данные пользователя обновлены: " + user.getLogin());
-        } else {
-            log.info("Попытка обновления данных несуществующего пользователя");
-            throw new ValidationException("Попытка обновления данных несуществующего пользователя");
+        if (isUserNotFound) {
+            log.info("Trying to update a data of unknown user");
+            throw new ValidationException("Trying to update a data of unknown user");
         }
         return user;
     }
@@ -98,8 +116,8 @@ public class InMemoryUserStorage implements UserStorage {
     public User deleteUser(User user) throws ValidationException {
         int userId = user.getId();
 
-        if (userList.contains(user)) {
-                userList.remove(user);
+        if (userMap.containsValue(user)) {
+                userMap.remove(user);
                 log.info("Удаление пользователя из списка: " + user.getLogin());
             } else {
                 log.info("Попытка удаления несуществующего пользователя");
