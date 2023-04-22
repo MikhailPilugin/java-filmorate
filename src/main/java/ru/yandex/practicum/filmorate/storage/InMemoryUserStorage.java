@@ -66,7 +66,7 @@ public class InMemoryUserStorage implements UserStorage {
         if (userMap.isEmpty() && isBirthDayBeforeToday) {
             id = 1;
             user.setId(id);
-            userMap.put(0, user);
+            userMap.put(1, user);
 
             log.info("Добавлен новый пользователь: " + user.getLogin());
 
@@ -79,7 +79,7 @@ public class InMemoryUserStorage implements UserStorage {
 
             id++;
             user.setId(id);
-            userMap.put(id-1, user);
+            userMap.put(id, user);
 
             log.info("Добавлен новый пользователь: " + user.getLogin());
 

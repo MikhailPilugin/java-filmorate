@@ -34,21 +34,21 @@ public class User {
     private Set<Integer> friends;
 
     public int setFriends(Integer id) {
-        int status = 0;
+        int status = 1;
 
         if (id != null) {
             friends.add(id);
-            status = 1;
+            status = 0;
         }
         return status;
     }
 
     public int removeFriends(Integer id) {
-        int status = 0;
+        int status = 1;
 
         if (id != null) {
             friends.remove(id);
-            status = 1;
+            status = 0;
         }
         return status;
     }
