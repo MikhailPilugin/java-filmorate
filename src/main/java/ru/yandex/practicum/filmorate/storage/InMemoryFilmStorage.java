@@ -5,16 +5,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.Map;
 
 @Component
 @Slf4j
 public class InMemoryFilmStorage implements FilmStorage {
+    public static Map<Integer, Film> filmMap = new HashMap<>();
     public FilmService filmService;
-    private int id = 1;
+    private int id;
 
     @Autowired
     public InMemoryFilmStorage(FilmService filmService) {
@@ -23,7 +27,26 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Map<Integer, Film> getFilms() {
-        return filmService.filmMap;
+        return filmMap;
+    }
+
+    @Override
+    public Film getFilmById(Integer id) {
+        Film film = null;
+        boolean isFilmNotFound = true;
+
+        for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
+            if (integerFilmEntry.getValue().getId() == id) {
+                isFilmNotFound = false;
+                film = integerFilmEntry.getValue();
+                break;
+            }
+        }
+
+        if (isFilmNotFound) {
+            throw new IllegalArgumentException("User not found");
+        }
+        return film;
     }
 
     @Override
@@ -32,12 +55,13 @@ public class InMemoryFilmStorage implements FilmStorage {
         LocalDate firstReleaseFilm = LocalDate.of(1895, 12, 28);
         boolean isReleaseDateAfterFirstRelease = releaseDate.isAfter(firstReleaseFilm);
 
-        if (filmService.filmMap.size() == 0 && isReleaseDateAfterFirstRelease) {
+        if (filmMap.size() == 0 && isReleaseDateAfterFirstRelease) {
+            id = 1;
             film.setId(id);
-            filmService.filmMap.put(id, film);
+            filmMap.put(id, film);
 
         } else if (isReleaseDateAfterFirstRelease) {
-            for (Map.Entry<Integer, Film> integerFilmEntry : filmService.filmMap.entrySet()) {
+            for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
                 if (integerFilmEntry.getValue().getName() == film.getName()) {
                     System.out.println("Этот название уже занято");
 
@@ -45,7 +69,7 @@ public class InMemoryFilmStorage implements FilmStorage {
                 } else {
                     film.setId(++id);
 
-                    filmService.filmMap.put(film.getId(), film);
+                    filmMap.put(film.getId(), film);
 
                     log.info("Добавлен новый фильм: " + film.getName());
                 }
@@ -62,9 +86,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film updateFilm(Film film) throws ValidationException {
         int filmId = film.getId();
 
-        for (Map.Entry<Integer, Film> integerFilmEntry : filmService.filmMap.entrySet()) {
+        for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
             if (integerFilmEntry.getValue().getId() == filmId) {
-                filmService.filmMap.replace(film.getId(), film);
+                filmMap.replace(film.getId(), film);
 
                 log.info("Данные фильма обновлены: " + film.getName());
             } else {
@@ -79,9 +103,9 @@ public class InMemoryFilmStorage implements FilmStorage {
     public Film deleteFilm(Film film) throws ValidationException {
         int filmId = film.getId();
 
-        for (Map.Entry<Integer, Film> integerFilmEntry : filmService.filmMap.entrySet()) {
+        for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
             if (integerFilmEntry.getValue().getId() == filmId) {
-                filmService.filmMap.remove(film.getId(), film);
+                filmMap.remove(film.getId(), film);
 
                 log.info("Удаление фильма из списка: " + film.getName());
             } else {

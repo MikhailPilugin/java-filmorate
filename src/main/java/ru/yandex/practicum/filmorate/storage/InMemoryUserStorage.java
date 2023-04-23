@@ -38,6 +38,7 @@ public class InMemoryUserStorage implements UserStorage {
             if (integerUserEntry.getValue().getId() == id) {
                 isUserNotFound = false;
                 user = integerUserEntry.getValue();
+                break;
             }
         }
 
@@ -49,7 +50,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) throws ValidationException {
-        if(user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().isBlank()) {
+        if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().isBlank()) {
             throw new ValidationException("Login incorrect");
         }
 
@@ -66,20 +67,20 @@ public class InMemoryUserStorage implements UserStorage {
         if (userMap.isEmpty() && isBirthDayBeforeToday) {
             id = 1;
             user.setId(id);
-            userMap.put(1, user);
+            userMap.put(0, user);
 
             log.info("Добавлен новый пользователь: " + user.getLogin());
 
             // пользователи уже есть
         } else if (isBirthDayBeforeToday) {
             if (userMap.containsValue(user)) {
-                    log.info("Попытка добавления пользователя с занятым логином: " + user.getLogin());
-                    throw new ValidationException("Этот login уже занят");
-                }
+                log.info("Попытка добавления пользователя с занятым логином: " + user.getLogin());
+                throw new ValidationException("Этот login уже занят");
+            }
 
             id++;
             user.setId(id);
-            userMap.put(id, user);
+            userMap.put(id - 1, user);
 
             log.info("Добавлен новый пользователь: " + user.getLogin());
 
@@ -117,12 +118,12 @@ public class InMemoryUserStorage implements UserStorage {
         int userId = user.getId();
 
         if (userMap.containsValue(user)) {
-                userMap.remove(user);
-                log.info("Удаление пользователя из списка: " + user.getLogin());
-            } else {
-                log.info("Попытка удаления несуществующего пользователя");
-                throw new ValidationException("Попытка удаления несуществующего пользователя");
-            }
+            userMap.remove(user);
+            log.info("Удаление пользователя из списка: " + user.getLogin());
+        } else {
+            log.info("Попытка удаления несуществующего пользователя");
+            throw new ValidationException("Попытка удаления несуществующего пользователя");
+        }
         return user;
     }
 }

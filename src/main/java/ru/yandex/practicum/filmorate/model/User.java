@@ -16,10 +16,6 @@ import java.util.Set;
 public class User {
     private int id;
 
-    public User() {
-        this.friends = new HashSet<>();
-    }
-
     @Email
     @NotNull
     @NotBlank
@@ -32,6 +28,10 @@ public class User {
     private LocalDate birthday;
 
     private Set<Integer> friends;
+
+    public User() {
+        this.friends = new HashSet<>();
+    }
 
     public int setFriends(Integer id) {
         int status = 1;

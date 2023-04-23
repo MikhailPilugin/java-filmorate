@@ -25,7 +25,7 @@ public class UserController {
 
     @GetMapping("/users")
     public Collection<User> getUsers() {
-        return InMemoryUserStorage.userMap.values();
+        return inMemoryUserStorage.getUsers().values();
     }
 
     @GetMapping("/users/{id}")

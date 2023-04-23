@@ -32,7 +32,7 @@ public class UserService {
         int statusAddUser = user.setFriends(friend.getId());
         int statusAddFriend = friend.setFriends(user.getId());
 
-        if(statusAddUser == 0 && statusAddFriend == 0) {
+        if (statusAddUser == 1 && statusAddFriend == 1) {
             isFriendsAdd = true;
         }
 
@@ -66,7 +66,7 @@ public class UserService {
         int delStatusUser = user.removeFriends(friend.getId());
         int delStatusFriend = friend.removeFriends(user.getId());
 
-        if(delStatusUser == 0 && delStatusFriend == 0) {
+        if (delStatusUser == 1 && delStatusFriend == 1) {
             isFriendsDelete = true;
         }
 

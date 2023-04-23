@@ -1,73 +1,99 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class FilmService {
-    public Map<Integer, Film> filmMap;
+    public boolean addLike(Integer id, Integer userId) {
+        Film film = null;
+        int indexFilm = 0;
+        int statusRadeAdd;
+        boolean rateIsAdded = false;
 
-    @Autowired
-    public FilmService(Map<Integer, Film> filmMap) {
-        this.filmMap = filmMap;
-    }
+        if (id < 0 || userId < 0) {
+            throw new IllegalArgumentException("Отрицательное значение переменной пути");
+        }
 
-    public Film addLike(long id, long userId) {
-        Film film;
-
-        for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
-            if (integerFilmEntry.getKey() == id) {
-                film = integerFilmEntry.getValue();
-                Set<Long> likes = film.getLikes();
-                likes.add(userId);
-                film.setLikes(likes);
-                filmMap.put(film.getId(), film);
+        for (int i = 1; i <= InMemoryFilmStorage.filmMap.size(); i++) {
+            if (InMemoryFilmStorage.filmMap.get(i).getId() == id) {
+                film = InMemoryFilmStorage.filmMap.get(i);
+                indexFilm = i;
             }
         }
-        
-        return filmMap.get(id);
+
+        statusRadeAdd = film.setLikes(userId);
+        InMemoryFilmStorage.filmMap.replace(indexFilm, film);
+
+        if (statusRadeAdd == 0) {
+            rateIsAdded = true;
+        }
+
+        return rateIsAdded;
     }
 
-    public Film delLike(long id, long userId) {
-        Film film;
+    public boolean delLike(Integer id, Integer userId) {
+        Film film = null;
+        int indexFilm = 0;
+        int statusRadeDel;
+        boolean rateIsDelete = false;
 
-        for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
-            if (integerFilmEntry.getKey() == id) {
-                film = integerFilmEntry.getValue();
-                Set<Long> likes = film.getLikes();
-                likes.remove(userId);
-                film.setLikes(likes);
-                filmMap.put(film.getId(), film);
+        if (id < 0 || userId < 0) {
+            throw new IllegalArgumentException("Отрицательное значение переменной пути");
+        }
+
+        for (int i = 1; i <= InMemoryFilmStorage.filmMap.size(); i++) {
+            if (InMemoryFilmStorage.filmMap.get(i).getId() == id) {
+                film = InMemoryFilmStorage.filmMap.get(i);
+                indexFilm = i;
+                break;
             }
         }
-        
-        return filmMap.get(id);
+
+        statusRadeDel = film.removeLikes(userId);
+        InMemoryFilmStorage.filmMap.replace(indexFilm, film);
+
+        if (statusRadeDel == 0) {
+            rateIsDelete = true;
+        }
+        return rateIsDelete;
     }
 
-    public List<Integer> getPopularFilms(Long count) {
-        List<Integer> allLikes = null;
-        List<Integer> sortedLikes = null;
+    public List<Film> getPopularFilms(Integer count) {
+        Film film = null;
+        List<Film> allRatedFilms = new ArrayList<>();
+        List<Film> sortedRatedFilms = new ArrayList<>();
 
-            for (Map.Entry<Integer, Film> integerFilmEntry : filmMap.entrySet()) {
-                allLikes.add(integerFilmEntry.getValue().getLikes().size());
+        for (Map.Entry<Integer, Film> integerFilmEntry : InMemoryFilmStorage.filmMap.entrySet()) {
+            if (integerFilmEntry.getValue().getRate() != 0) {
+                film = integerFilmEntry.getValue();
+                allRatedFilms.add(film);
             }
+        }
 
-            if (count == null) {
-                for (int i = 0; i < 10; i++) {
-                    sortedLikes.add(allLikes.get(i));
-                }
+        Collections.reverse(allRatedFilms);
+
+        Collections.sort(allRatedFilms,
+                (o2, o1) -> o2.getRate());
+
+        if (count != null) {
+            sortedRatedFilms = allRatedFilms.subList(0, count);
+        } else {
+
+            int size = allRatedFilms.size();
+
+            if (size < 10) {
+                sortedRatedFilms = allRatedFilms.subList(0, size);
             } else {
-                for (int i = 0; i < count; i++) {
-                    sortedLikes.add(allLikes.get(i));
-                }
+                sortedRatedFilms = allRatedFilms.subList(0, 11);
             }
-
-        Collections.reverse(sortedLikes);
-
-            return sortedLikes;
+        }
+        return sortedRatedFilms;
     }
 }
