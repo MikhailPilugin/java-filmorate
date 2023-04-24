@@ -1,91 +1,94 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
-@RequestMapping("/users")
-@Slf4j
+@ResponseBody
 public class UserController {
-    Map<Integer, User> userMap = new HashMap<>();
-    int id = 1;
+    private InMemoryUserStorage inMemoryUserStorage;
+    private UserService userService;
 
-    @GetMapping
-    public Collection<?> getUsers() {
-        return userMap.values();
+    @Autowired
+    public UserController(InMemoryUserStorage inMemoryUserStorage, UserService userService) {
+        this.inMemoryUserStorage = inMemoryUserStorage;
+        this.userService = userService;
     }
 
-    @PostMapping
+    @GetMapping("/users")
+    public Collection<User> getUsers() {
+        return inMemoryUserStorage.getUsers().values();
+    }
+
+    @GetMapping("/users/{id}")
+    public User getUser(@PathVariable Integer id) throws ValidationException {
+        return inMemoryUserStorage.getUserById(id);
+    }
+
+    @PostMapping("/users")
     public User addUser(@RequestBody @Valid User user) throws ValidationException {
-
-        // проверка логина
-        String login = user.getLogin();
-        String space = " ";
-        boolean isLoginContainsSpace = login.contains(space);
-        boolean isLoginNotEmpty = !login.isEmpty();
-
-        // проверка имени - если имя не добавлено, подставляем логин в имя
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
-
-        // проверка даты рождения
-        LocalDate today = LocalDate.now();
-        boolean isBirthDayBeforeToday = user.getBirthday().isBefore(today);
-
-        // если пользователей ещё нет - добавляем первого
-        if (userMap.size() == 0 && !isLoginContainsSpace && isLoginNotEmpty && isBirthDayBeforeToday) {
-            user.setId(id);
-            userMap.put(id, user);
-
-            log.info("Добавлен новый пользователь: " + user.getLogin());
-
-        // пользователи уже есть
-        } else if (isLoginNotEmpty && isBirthDayBeforeToday && !isLoginContainsSpace) {
-
-            for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
-                String userLogin = integerUserEntry.getValue().getLogin();
-
-                if (user.getLogin().equals(userLogin)) {
-                    log.info("Попытка добавления пользователя с занятым логином: " + user.getLogin());
-                    throw new ValidationException("Этот login уже занят");
-                }
-            }
-
-            user.setId(++id);
-
-            userMap.put(user.getId(), user);
-            log.info("Добавлен новый пользователь: " + user.getLogin());
-
-        } else {
-            log.info("Ошибка данных при добавлении пользователя");
-            throw new ValidationException("Ошибка данных при добавлении пользователя");
-        }
-        return user;
+        return inMemoryUserStorage.addUser(user);
     }
 
-    @PutMapping
+    @PutMapping("/users")
     public User updateUser(@RequestBody @Valid User user) throws ValidationException {
+        return inMemoryUserStorage.updateUser(user);
+    }
 
-        int userId = user.getId();
+    @DeleteMapping("/users")
+    public User deleteUser(@RequestBody @Valid User user) throws ValidationException {
+        return inMemoryUserStorage.deleteUser(user);
+    }
 
-        for (Map.Entry<Integer, User> integerUserEntry : userMap.entrySet()) {
-            if (integerUserEntry.getValue().getId() == userId) {
-                userMap.put(userId, user);
-                log.info("Данные пользователя обновлены: " + user.getLogin());
-            } else {
-                log.info("Попытка обновления данных несуществующего пользователя");
-                throw new ValidationException("Попытка обновления данных несуществующего пользователя");
-            }
-        }
-        return user;
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public boolean addFriend(@PathVariable Integer id, @PathVariable Integer friendId) throws ValidationException {
+        return userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public boolean delFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        return userService.delFriend(id, friendId);
+    }
+
+    @GetMapping("/users/{id}/friends")
+    public Collection<User> getFriends(@PathVariable int id) {
+        return userService.getFriend(id);
+    }
+
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public Collection<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.getCommonFriends(id, otherId);
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleValidationException(final ValidationException e) {
+        return new ErrorResponse("error", "Передан некорректный параметр");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleRuntimeException(final RuntimeException e) {
+        return new ErrorResponse("error", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleInterruptedException(final NullPointerException e) {
+        return new ErrorResponse("error", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleIllegalArgumentException(final IllegalArgumentException e) {
+        return new ErrorResponse("error", e.getMessage());
     }
 }
