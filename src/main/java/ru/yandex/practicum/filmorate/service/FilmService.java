@@ -10,13 +10,14 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class FilmService {
+public class FilmService implements FilmServiceInterface {
     InMemoryFilmStorage inMemoryFilmStorage;
 
     public FilmService(InMemoryFilmStorage inMemoryFilmStorage) {
         this.inMemoryFilmStorage = inMemoryFilmStorage;
     }
 
+    @Override
     public boolean addLike(Integer id, Integer userId) {
         Film film = null;
         int indexFilm = 0;
@@ -44,6 +45,7 @@ public class FilmService {
         return rateIsAdded;
     }
 
+    @Override
     public boolean delLike(Integer id, Integer userId) {
         Film film = null;
         int indexFilm = 0;
@@ -71,6 +73,7 @@ public class FilmService {
         return rateIsDelete;
     }
 
+    @Override
     public List<Film> getPopularFilms(Integer count) {
         Film film = null;
         List<Film> allRatedFilms = new ArrayList<>();

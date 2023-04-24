@@ -7,13 +7,14 @@ import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import java.util.*;
 
 @Service
-public class UserService {
+public class UserService implements UserServiceInterface {
     InMemoryUserStorage inMemoryUserStorage;
 
     public UserService(InMemoryUserStorage inMemoryUserStorage) {
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
 
+    @Override
     public boolean addFriend(int id, int friendId) {
         User user = null;
         User friend = null;
@@ -48,6 +49,7 @@ public class UserService {
         return isFriendsAdd;
     }
 
+    @Override
     public boolean delFriend(Integer id, Integer friendId) {
         User user = null;
         User friend = null;
@@ -82,6 +84,7 @@ public class UserService {
         return isFriendsDelete;
     }
 
+    @Override
     public Collection<User> getFriend(int id) {
         User user = null;
         List<User> userFriendsList = new ArrayList<>();
@@ -104,6 +107,7 @@ public class UserService {
         return userFriendsList;
     }
 
+    @Override
     public Collection<User> getCommonFriends(Integer id, Integer otherId) {
         User user;
         Set<Integer> commonFriends = null;

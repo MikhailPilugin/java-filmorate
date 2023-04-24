@@ -1,0 +1,13 @@
+package ru.yandex.practicum.filmorate.service;
+
+import ru.yandex.practicum.filmorate.model.Film;
+
+import java.util.List;
+
+public interface FilmServiceInterface {
+    public boolean addLike(Integer id, Integer userId);
+
+    public boolean delLike(Integer id, Integer userId);
+
+    public List<Film> getPopularFilms(Integer count);
+}
