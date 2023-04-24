@@ -8,6 +8,12 @@ import java.util.*;
 
 @Service
 public class UserService {
+    InMemoryUserStorage inMemoryUserStorage;
+
+    public UserService(InMemoryUserStorage inMemoryUserStorage) {
+        this.inMemoryUserStorage = inMemoryUserStorage;
+    }
+
     public boolean addFriend(int id, int friendId) {
         User user = null;
         User friend = null;
@@ -19,13 +25,13 @@ public class UserService {
             throw new IllegalArgumentException("Отрицательное значение переменной пути");
         }
 
-        for (int i = 0; i < InMemoryUserStorage.userMap.size(); i++) {
-            if (InMemoryUserStorage.userMap.get(i).getId() == id) {
+        for (int i = 0; i < inMemoryUserStorage.userMap.size(); i++) {
+            if (inMemoryUserStorage.userMap.get(i).getId() == id) {
                 userIndex = i;
-                user = InMemoryUserStorage.userMap.get(i);
-            } else if (InMemoryUserStorage.userMap.get(i).getId() == friendId) {
+                user = inMemoryUserStorage.userMap.get(i);
+            } else if (inMemoryUserStorage.userMap.get(i).getId() == friendId) {
                 friendIndex = i;
-                friend = InMemoryUserStorage.userMap.get(i);
+                friend = inMemoryUserStorage.userMap.get(i);
             }
         }
 
@@ -36,8 +42,8 @@ public class UserService {
             isFriendsAdd = true;
         }
 
-        InMemoryUserStorage.userMap.replace(userIndex, user);
-        InMemoryUserStorage.userMap.replace(friendIndex, friend);
+        inMemoryUserStorage.userMap.replace(userIndex, user);
+        inMemoryUserStorage.userMap.replace(friendIndex, friend);
 
         return isFriendsAdd;
     }
@@ -53,13 +59,13 @@ public class UserService {
             throw new IllegalArgumentException("Отрицательное значение переменной пути");
         }
 
-        for (int i = 0; i < InMemoryUserStorage.userMap.size(); i++) {
-            if (InMemoryUserStorage.userMap.get(i).getId() == id) {
+        for (int i = 0; i < inMemoryUserStorage.userMap.size(); i++) {
+            if (inMemoryUserStorage.userMap.get(i).getId() == id) {
                 userIndex = i;
-                user = InMemoryUserStorage.userMap.get(i);
-            } else if (InMemoryUserStorage.userMap.get(i).getId() == friendId) {
+                user = inMemoryUserStorage.userMap.get(i);
+            } else if (inMemoryUserStorage.userMap.get(i).getId() == friendId) {
                 friendIndex = i;
-                friend = InMemoryUserStorage.userMap.get(i);
+                friend = inMemoryUserStorage.userMap.get(i);
             }
         }
 
@@ -70,8 +76,8 @@ public class UserService {
             isFriendsDelete = true;
         }
 
-        InMemoryUserStorage.userMap.replace(userIndex, user);
-        InMemoryUserStorage.userMap.replace(friendIndex, friend);
+        inMemoryUserStorage.userMap.replace(userIndex, user);
+        inMemoryUserStorage.userMap.replace(friendIndex, friend);
 
         return isFriendsDelete;
     }
@@ -81,7 +87,7 @@ public class UserService {
         List<User> userFriendsList = new ArrayList<>();
         Set<Integer> userFriendsSet;
 
-        for (Map.Entry<Integer, User> integerUserEntry : InMemoryUserStorage.userMap.entrySet()) {
+        for (Map.Entry<Integer, User> integerUserEntry : inMemoryUserStorage.userMap.entrySet()) {
             if (integerUserEntry.getValue().getId() == id) {
                 user = integerUserEntry.getValue();
                 break;
@@ -90,7 +96,7 @@ public class UserService {
 
         userFriendsSet = user.getFriends();
 
-        for (Map.Entry<Integer, User> integerUserEntry : InMemoryUserStorage.userMap.entrySet()) {
+        for (Map.Entry<Integer, User> integerUserEntry : inMemoryUserStorage.userMap.entrySet()) {
             if (userFriendsSet.contains(integerUserEntry.getValue().getId())) {
                 userFriendsList.add(integerUserEntry.getValue());
             }
@@ -105,7 +111,7 @@ public class UserService {
         Set<Integer> setId = null;
         Set<Integer> setOtherId = null;
 
-        for (Map.Entry<Integer, User> integerUserEntry : InMemoryUserStorage.userMap.entrySet()) {
+        for (Map.Entry<Integer, User> integerUserEntry : inMemoryUserStorage.userMap.entrySet()) {
             if (integerUserEntry.getValue().getId() == id) {
                 setId = integerUserEntry.getValue().getFriends();
             } else if (integerUserEntry.getValue().getId() == otherId) {
@@ -117,7 +123,7 @@ public class UserService {
         common.retainAll(setOtherId);
 
         if (common.size() != 0) {
-            for (Map.Entry<Integer, User> integerUserEntry : InMemoryUserStorage.userMap.entrySet()) {
+            for (Map.Entry<Integer, User> integerUserEntry : inMemoryUserStorage.userMap.entrySet()) {
                 if (common.contains(integerUserEntry.getValue().getId())) {
                     listCommonFriends.add(integerUserEntry.getValue());
                 }

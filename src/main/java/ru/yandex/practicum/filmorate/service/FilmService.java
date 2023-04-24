@@ -11,6 +11,12 @@ import java.util.Map;
 
 @Service
 public class FilmService {
+    InMemoryFilmStorage inMemoryFilmStorage;
+
+    public FilmService(InMemoryFilmStorage inMemoryFilmStorage) {
+        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    }
+
     public boolean addLike(Integer id, Integer userId) {
         Film film = null;
         int indexFilm = 0;
@@ -21,15 +27,15 @@ public class FilmService {
             throw new IllegalArgumentException("Отрицательное значение переменной пути");
         }
 
-        for (int i = 1; i <= InMemoryFilmStorage.filmMap.size(); i++) {
-            if (InMemoryFilmStorage.filmMap.get(i).getId() == id) {
-                film = InMemoryFilmStorage.filmMap.get(i);
+        for (int i = 1; i <= inMemoryFilmStorage.filmMap.size(); i++) {
+            if (inMemoryFilmStorage.filmMap.get(i).getId() == id) {
+                film = inMemoryFilmStorage.filmMap.get(i);
                 indexFilm = i;
             }
         }
 
         statusRadeAdd = film.setLikes(userId);
-        InMemoryFilmStorage.filmMap.replace(indexFilm, film);
+        inMemoryFilmStorage.filmMap.replace(indexFilm, film);
 
         if (statusRadeAdd == 0) {
             rateIsAdded = true;
@@ -48,16 +54,16 @@ public class FilmService {
             throw new IllegalArgumentException("Отрицательное значение переменной пути");
         }
 
-        for (int i = 1; i <= InMemoryFilmStorage.filmMap.size(); i++) {
-            if (InMemoryFilmStorage.filmMap.get(i).getId() == id) {
-                film = InMemoryFilmStorage.filmMap.get(i);
+        for (int i = 1; i <= inMemoryFilmStorage.filmMap.size(); i++) {
+            if (inMemoryFilmStorage.filmMap.get(i).getId() == id) {
+                film = inMemoryFilmStorage.filmMap.get(i);
                 indexFilm = i;
                 break;
             }
         }
 
         statusRadeDel = film.removeLikes(userId);
-        InMemoryFilmStorage.filmMap.replace(indexFilm, film);
+        inMemoryFilmStorage.filmMap.replace(indexFilm, film);
 
         if (statusRadeDel == 0) {
             rateIsDelete = true;
@@ -70,7 +76,7 @@ public class FilmService {
         List<Film> allRatedFilms = new ArrayList<>();
         List<Film> sortedRatedFilms = new ArrayList<>();
 
-        for (Map.Entry<Integer, Film> integerFilmEntry : InMemoryFilmStorage.filmMap.entrySet()) {
+        for (Map.Entry<Integer, Film> integerFilmEntry : inMemoryFilmStorage.filmMap.entrySet()) {
             if (integerFilmEntry.getValue().getRate() != 0) {
                 film = integerFilmEntry.getValue();
                 allRatedFilms.add(film);
