@@ -47,3 +47,41 @@ NC-17 — лицам до 18 лет просмотр запрещён.
 
 * **(user_id, film_id)** - составной первичный ключ (формируется из  user_id таблицы Users и film_id из таблицы Film)
 * **rate** - рейтинг фильма, составленный из количества лайков пользователей
+
+
+## Пример запросов к БД
+
+INSERT INTO users VALUES ('1','ser', 'sergey', 'sergeev', '1990-01-01', 'sergey@mail.ru');
+INSERT INTO users VALUES ('2','pet', 'petr', 'petrov', '1990-02-01', 'petr@mail.ru');
+
+INSERT INTO friendship VALUES ('1', '2', 'UNCONFIRMED');
+INSERT INTO friendship VALUES ('2', '1', 'UNCONFIRMED');
+
+UPDATE friendship
+SET status = 'CONFIRMED'
+WHERE user_id = '1' AND friend_id = '2';
+
+SELECT *
+FROM users;
+
+SELECT *
+FROM friendship;
+
+INSERT INTO genre VALUES ('2', 'DRAMA');
+INSERT INTO genre VALUES ('3', 'CARTOON');
+INSERT INTO genre VALUES ('4', 'THRILLER');
+INSERT INTO genre VALUES ('5', 'DOCUMENTARY');
+INSERT INTO genre VALUES ('6', 'ACTION');
+
+SELECT *
+FROM genre;
+
+INSERT INTO film VALUES ('1', '1', 'Kino 1', 'Horoshee kino', '2022-01-01', '120', 'G');
+
+SELECT *
+FROM film;
+
+INSERT INTO likes VALUES ('1', '1', '0');
+
+SELECT *
+FROM likes;
