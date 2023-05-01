@@ -1,7 +1,7 @@
 # Схема БД приложения Filmorate
 
 
-![Схема БД приложения Filmorate](documents/DB_filmorate_scheme_.png)
+![Схема БД приложения Filmorate](documents/DB_filmorate_scheme.png)
 
 # Описание таблиц:
 
@@ -35,7 +35,9 @@
 * **description** - краткое описание фильма
 * **release_date** - дата премьеры фильма
 * **duration** - продолжительность фильма
-* **mpa_rating** - возрастной рейтинг. Например:
+* **mpa_rating** - возрастной рейтинг.
+  
+  Например:
 G — у фильма нет возрастных ограничений,
 PG — детям рекомендуется смотреть фильм с родителями,
 PG-13 — детям до 13 лет просмотр не желателен,
@@ -43,7 +45,7 @@ R — лицам до 17 лет просматривать фильм можно
 NC-17 — лицам до 18 лет просмотр запрещён.
 
 
-## Likes - содержит данные о пользовательском рейтинге фильма
+## Rating - содержит данные о пользовательском рейтинге фильма
 
 * **(user_id, film_id)** - составной первичный ключ (формируется из  user_id таблицы Users и film_id из таблицы Film)
 * **rate** - рейтинг фильма, составленный из количества лайков пользователей
@@ -51,37 +53,59 @@ NC-17 — лицам до 18 лет просмотр запрещён.
 
 ## Пример запросов к БД
 
-INSERT INTO users VALUES ('1','ser', 'sergey', 'sergeev', '1990-01-01', 'sergey@mail.ru');
-INSERT INTO users VALUES ('2','pet', 'petr', 'petrov', '1990-02-01', 'petr@mail.ru');
+* **Наполнение таблицы Users**
 
-INSERT INTO friendship VALUES ('1', '2', 'UNCONFIRMED');
-INSERT INTO friendship VALUES ('2', '1', 'UNCONFIRMED');
+  INSERT INTO users VALUES ('1','ser', 'sergey', 'sergeev', '1990-01-01', 'sergey@mail.ru');
+  
+  INSERT INTO users VALUES ('2','pet', 'petr', 'petrov', '1990-02-01', 'petr@mail.ru');
 
-UPDATE friendship
-SET status = 'CONFIRMED'
-WHERE user_id = '1' AND friend_id = '2';
+* **Выводим данные конкретного пользователя**
+  
+  SELECT login, first_name, last_name, email FROM users WHERE user_id = '1';
 
-SELECT *
-FROM users;
+* **Наполнение таблицы friendship**
 
-SELECT *
-FROM friendship;
+    INSERT INTO friendship VALUES ('1', '2', 'UNCONFIRMED');
 
-INSERT INTO genre VALUES ('2', 'DRAMA');
-INSERT INTO genre VALUES ('3', 'CARTOON');
-INSERT INTO genre VALUES ('4', 'THRILLER');
-INSERT INTO genre VALUES ('5', 'DOCUMENTARY');
-INSERT INTO genre VALUES ('6', 'ACTION');
+    INSERT INTO friendship VALUES ('2', '1', 'UNCONFIRMED');
 
-SELECT *
-FROM genre;
+* **Изменение статуса запроса в друзья**
+
+    UPDATE friendship SET status = 'CONFIRMED' WHERE user_id = '1' AND friend_id = '2';
+
+* **Проверка изменения статуса запроса в друзья**
+
+    SELECT user_id, friend_id, status FROM friendship WHERE user_id = '1' AND friend_id = '2';
+
+
+* **Наполнение таблицы Genre**
+
+    INSERT INTO genre VALUES ('2', 'DRAMA');
+
+    INSERT INTO genre VALUES ('3', 'CARTOON');
+
+    INSERT INTO genre VALUES ('4', 'THRILLER');
+
+    INSERT INTO genre VALUES ('5', 'DOCUMENTARY');
+
+    INSERT INTO genre VALUES ('6', 'ACTION');
+
+* **Проверка добавления жанров в таблицу**
+
+    SELECT * FROM genre;
+
+* **Наполнение таблицы film**
 
 INSERT INTO film VALUES ('1', '1', 'Kino 1', 'Horoshee kino', '2022-01-01', '120', 'G');
 
-SELECT *
-FROM film;
+* **Вывод информации о фильме**
 
-INSERT INTO likes VALUES ('1', '1', '0');
+    SELECT f.name, f.description, g.name FROM film AS f LEFT OUTER JOIN genre AS g ON f.film_id = '1' LIMIT 1;
 
-SELECT *
-FROM likes;
+* **Наполнение таблицы rating**
+
+    INSERT INTO rating VALUES ('1', '1', '0');
+
+* **Вывод информации о рейтинге фильма**
+
+    SELECT r.user_id, r.film_id, r.rate FROM rating AS r;
