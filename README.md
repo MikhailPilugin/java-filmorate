@@ -1,4 +1,4 @@
-# Схема БД приложения Filmorate
+ыегв# Схема БД приложения Filmorate
 
 
 ![Схема БД приложения Filmorate](documents/DB_filmorate_scheme_.png)
@@ -58,35 +58,51 @@
 
 * **Вывод информации о первых 10 пользователях**
 
-    SELECT login, user_name, birthday, email
-    FROM users
-    LIMIT 10;
+   ```
+   SELECT login, user_name, birthday, email
+        FROM users
+        LIMIT 10;
+   ```
 
 * **Получить 10 лучших фильмов**
 
+    ```
     SELECT f.film_name, f.description, f.likes
-    FROM film AS f
-    GROUP BY f.film_name, f.description, f.likes
-    ORDER BY f.likes DESC
-    LIMIT 10;
+        FROM film AS f
+        ORDER BY f.likes DESC
+        LIMIT 10;
+    ```
 
 * **Получить общих друзей**
   
-    SELECT user_id, friend_id
-    FROM friendship
-    WHERE friend_id = '1' AND status = 'CONFIRMED';
+    ```
+    SELECT *
+        FROM friendship
+        WHERE user_id IN (
+            SELECT friend_id
+            FROM friendship
+            WHERE user_id = '1' AND status = 'CONFIRMED'
+            INTERSECT
+            SELECT friend_id
+            FROM friendship
+            WHERE user_id = '2' AND status = 'CONFIRMED'
+    );
+    ```
 
 * **Вывод информации о фильме. Сортировка по лайкам в порядке убывания**
 
+    ```
     SELECT f.film_name, f.description, g.genre_name, mpa.mpa_name, f.duration, f.release_date, f.likes
-    FROM film AS f
-    LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id
-    LEFT OUTER JOIN mpa_rating AS mpa ON f.mpa_id = mpa.mpa_id
-    GROUP BY f.film_name, f.description, g.genre_name, mpa.mpa_name, f.duration, f.release_date, f.likes
-    ORDER BY f.likes DESC;
+        FROM film AS f
+        LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id
+        LEFT OUTER JOIN mpa_rating AS mpa ON f.mpa_id = mpa.mpa_id
+        ORDER BY f.likes DESC;
+    ```
 
 * **Вывод всей информации о первых 10 фильмах**
 
+    ```
     SELECT *
     FROM film
     LIMIT 10;
+    ```
