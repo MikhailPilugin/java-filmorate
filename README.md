@@ -1,7 +1,7 @@
 ыегв# Схема БД приложения Filmorate
 
 
-![Схема БД приложения Filmorate](documents/DB_filmorate_scheme_.png)
+![Схема БД приложения Filmorate](documents/DB_filmorate_scheme.png)
 
 # Описание таблиц:
 
@@ -35,7 +35,6 @@
 ## film - содержит данные о фильмах
 
 * **film_id** - идентификатор фильма, первичный ключ
-* **genre_id** - идентификатор жанра фильма, внешний ключ
 * **film_name** - название фильма
 * **description** - краткое описание фильма
 * **release_date** - дата премьеры фильма
@@ -94,7 +93,8 @@
     ```
     SELECT f.film_name, f.description, g.genre_name, mpa.mpa_name, f.duration, f.release_date, f.likes
         FROM film AS f
-        LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id
+        LEFT OUTER JOIN film_genres AS fg ON f.film_id = fg.film_id
+		LEFT OUTER JOIN genre AS g ON g.genre_id = fg.genre_id
         LEFT OUTER JOIN mpa_rating AS mpa ON f.mpa_id = mpa.mpa_id
         ORDER BY f.likes DESC;
     ```
