@@ -35,12 +35,12 @@
 * **release_date** - дата премьеры фильма
 * **duration** - продолжительность фильма
 * **mpa_id** - возрастной рейтинг.
+* **likes** - количество лайков пользователей
 
 ## film_likes - содержит данные о пользовательском рейтинге фильма
 
 * **user_id** - id пользователя, поставившего лайк. Внешний ключ 
 * **film_id** - id фильма. Внешний ключ
-* **likes** - количество лайков пользователей
 
 ## mpa_rating - содержит данные о возрастном рейтинге фильма (Ассоциации кинокомпаний - англ. Motion Picture Association, сокращённо МРА)
 
@@ -50,59 +50,37 @@
 
 ## Пример запросов к БД
 
-* **Наполнение таблицы Users**
+* **Вывод информации о первых 10 пользователях**
 
-  INSERT INTO users VALUES ('1','ser', 'sergey', 'sergeev', '1990-01-01', 'sergey@mail.ru');
+    SELECT login, user_name, birthday, email
+    FROM users
+    LIMIT 10;
+
+* **Получить 10 лучших фильмов**
+
+    SELECT f.film_name, f.description, f.likes
+    FROM film AS f
+    GROUP BY f.film_name, f.description, f.likes
+    ORDER BY f.likes DESC
+    LIMIT 10;
+
+* **Получить общих друзей**
   
-  INSERT INTO users VALUES ('2','pet', 'petr', 'petrov', '1990-02-01', 'petr@mail.ru');
+    SELECT user_id, friend_id
+    FROM friendship
+    WHERE friend_id = '1' AND status = 'CONFIRMED';
 
-* **Выводим данные конкретного пользователя**
-  
-  SELECT login, first_name, last_name, email FROM users WHERE user_id = '1';
+* **Вывод информации о фильме. Сортировка по лайкам в порядке убывания**
 
-* **Наполнение таблицы friendship**
+    SELECT f.film_name, f.description, g.genre_name, mpa.mpa_name, f.duration, f.release_date, f.likes
+    FROM film AS f
+    LEFT OUTER JOIN genre AS g ON f.genre_id = g.genre_id
+    LEFT OUTER JOIN mpa_rating AS mpa ON f.mpa_id = mpa.mpa_id
+    GROUP BY f.film_name, f.description, g.genre_name, mpa.mpa_name, f.duration, f.release_date, f.likes
+    ORDER BY f.likes DESC;
 
-    INSERT INTO friendship VALUES ('1', '2', 'UNCONFIRMED');
+* **Вывод всей информации о первых 10 фильмах**
 
-    INSERT INTO friendship VALUES ('2', '1', 'UNCONFIRMED');
-
-* **Изменение статуса запроса в друзья**
-
-    UPDATE friendship SET status = 'CONFIRMED' WHERE user_id = '1' AND friend_id = '2';
-
-* **Проверка изменения статуса запроса в друзья**
-
-    SELECT user_id, friend_id, status FROM friendship WHERE user_id = '1' AND friend_id = '2';
-
-
-* **Наполнение таблицы Genre**
-
-    INSERT INTO genre VALUES ('2', 'DRAMA');
-
-    INSERT INTO genre VALUES ('3', 'CARTOON');
-
-    INSERT INTO genre VALUES ('4', 'THRILLER');
-
-    INSERT INTO genre VALUES ('5', 'DOCUMENTARY');
-
-    INSERT INTO genre VALUES ('6', 'ACTION');
-
-* **Проверка добавления жанров в таблицу**
-
-    SELECT * FROM genre;
-
-* **Наполнение таблицы film**
-
-INSERT INTO film VALUES ('1', '1', 'Kino 1', 'Horoshee kino', '2022-01-01', '120', 'G');
-
-* **Вывод информации о фильме**
-
-    SELECT f.name, f.description, g.name FROM film AS f LEFT OUTER JOIN genre AS g ON f.film_id = '1' LIMIT 1;
-
-* **Наполнение таблицы rating**
-
-    INSERT INTO rating VALUES ('1', '1', '0');
-
-* **Вывод информации о рейтинге фильма**
-
-    SELECT r.user_id, r.film_id, r.rate FROM rating AS r;
+    SELECT *
+    FROM film
+    LIMIT 10;
