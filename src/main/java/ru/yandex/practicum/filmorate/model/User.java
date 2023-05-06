@@ -26,6 +26,8 @@ public class User {
 
     private Set<Integer> friends;
 
+    private String status;
+
     public User() {
         this.friends = new HashSet<>();
     }

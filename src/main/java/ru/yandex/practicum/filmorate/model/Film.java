@@ -28,6 +28,9 @@ public class Film {
     private Set<Integer> likes;
     private int rate;
 
+    private String genre;
+    private String mpaRating;
+
     public Film() {
         this.likes = new HashSet<>();
     }
@@ -53,4 +56,5 @@ public class Film {
         }
         return status;
     }
+
 }
