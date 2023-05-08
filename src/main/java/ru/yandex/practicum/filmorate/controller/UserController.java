@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -10,42 +11,43 @@ import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.Optional;
 
 @RestController
 @ResponseBody
 public class UserController {
-    private InMemoryUserStorage inMemoryUserStorage;
+    private UserDbStorage userDbStorage;
     private UserService userService;
 
     @Autowired
-    public UserController(InMemoryUserStorage inMemoryUserStorage, UserService userService) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserController(UserDbStorage userDbStorage, UserService userService) {
+        this.userDbStorage = userDbStorage;
         this.userService = userService;
     }
 
     @GetMapping("/users")
     public Collection<User> getUsers() {
-        return inMemoryUserStorage.getUsers().values();
+        return userDbStorage.getUsers().values();
     }
 
     @GetMapping("/users/{id}")
-    public User getUser(@PathVariable Integer id) throws ValidationException {
-        return inMemoryUserStorage.getUserById(id);
+    public User getUser(@PathVariable Integer id) {
+        return userDbStorage.getUserById(id);
     }
 
     @PostMapping("/users")
     public User addUser(@RequestBody @Valid User user) throws ValidationException {
-        return inMemoryUserStorage.addUser(user);
+        return userDbStorage.addUser(user);
     }
 
     @PutMapping("/users")
     public User updateUser(@RequestBody @Valid User user) throws ValidationException {
-        return inMemoryUserStorage.updateUser(user);
+        return userDbStorage.updateUser(user);
     }
 
     @DeleteMapping("/users")
     public User deleteUser(@RequestBody @Valid User user) throws ValidationException {
-        return inMemoryUserStorage.deleteUser(user);
+        return userDbStorage.deleteUser(user);
     }
 
     @PutMapping("/users/{id}/friends/{friendId}")

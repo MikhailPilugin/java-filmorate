@@ -1,138 +1,170 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
 public class UserService implements UserServiceInterface {
-    InMemoryUserStorage inMemoryUserStorage;
+    private final Logger log = LoggerFactory.getLogger(UserDbStorage.class);
+    private final UserDbStorage userDbStorage;
 
-    public UserService(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    private final JdbcTemplate jdbcTemplate;
+
+    public UserService(UserDbStorage userDbStorage, JdbcTemplate jdbcTemplate) {
+        this.userDbStorage = userDbStorage;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     @Override
     public boolean addFriend(int id, int friendId) {
-        User user = null;
-        User friend = null;
-        int userIndex = 0;
-        int friendIndex = 0;
+        SqlRowSet userRowsOne = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
+        SqlRowSet userRowsTwo = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", friendId);
+
         boolean isFriendsAdd = false;
 
-        if (id < 0 || friendId < 0) {
-            throw new IllegalArgumentException("Отрицательное значение переменной пути");
+        if(!userRowsOne.next()) {
+            throw new IllegalArgumentException("");
         }
 
-        for (int i = 0; i < inMemoryUserStorage.userMap.size(); i++) {
-            if (inMemoryUserStorage.userMap.get(i).getId() == id) {
-                userIndex = i;
-                user = inMemoryUserStorage.userMap.get(i);
-            } else if (inMemoryUserStorage.userMap.get(i).getId() == friendId) {
-                friendIndex = i;
-                friend = inMemoryUserStorage.userMap.get(i);
-            }
+        if (!userRowsTwo.next()) {
+            throw new IllegalArgumentException("");
         }
 
-        int statusAddUser = user.setFriends(friend.getId());
-        int statusAddFriend = friend.setFriends(user.getId());
+        String sqlQueryOne = "insert into friendship (user_id, friend_id, status) " +
+                "values (?, ?, ?)";
 
-        if (statusAddUser == 1 && statusAddFriend == 1) {
+        int statusOne = jdbcTemplate.update(sqlQueryOne
+                , id
+                , friendId
+                , "CONFIRMED");
+
+        if (statusOne > 0) {
             isFriendsAdd = true;
         }
-
-        inMemoryUserStorage.userMap.replace(userIndex, user);
-        inMemoryUserStorage.userMap.replace(friendIndex, friend);
 
         return isFriendsAdd;
     }
 
     @Override
     public boolean delFriend(Integer id, Integer friendId) {
-        User user = null;
-        User friend = null;
-        int userIndex = 0;
-        int friendIndex = 0;
+        SqlRowSet userRowsOne = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
+        SqlRowSet userRowsTwo = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", friendId);
+
         boolean isFriendsDelete = false;
 
-        if (id < 0 || friendId < 0) {
-            throw new IllegalArgumentException("Отрицательное значение переменной пути");
+        if(!userRowsOne.next()) {
+            throw new IllegalArgumentException("");
         }
 
-        for (int i = 0; i < inMemoryUserStorage.userMap.size(); i++) {
-            if (inMemoryUserStorage.userMap.get(i).getId() == id) {
-                userIndex = i;
-                user = inMemoryUserStorage.userMap.get(i);
-            } else if (inMemoryUserStorage.userMap.get(i).getId() == friendId) {
-                friendIndex = i;
-                friend = inMemoryUserStorage.userMap.get(i);
-            }
+        if (!userRowsTwo.next()) {
+            throw new IllegalArgumentException("");
         }
 
-        int delStatusUser = user.removeFriends(friend.getId());
-        int delStatusFriend = friend.removeFriends(user.getId());
+        String sqlQueryOne = "delete from friendship where user_id = ? and friend_id = ?";
 
-        if (delStatusUser == 1 && delStatusFriend == 1) {
+        int status = jdbcTemplate.update(sqlQueryOne, id, friendId);
+
+        if (status > 0) {
             isFriendsDelete = true;
         }
-
-        inMemoryUserStorage.userMap.replace(userIndex, user);
-        inMemoryUserStorage.userMap.replace(friendIndex, friend);
 
         return isFriendsDelete;
     }
 
     @Override
     public Collection<User> getFriend(int id) {
-        User user = null;
         List<User> userFriendsList = new ArrayList<>();
-        Set<Integer> userFriendsSet;
+        Set<Integer> userFriendsSet = new HashSet<>();
 
-        for (Map.Entry<Integer, User> integerUserEntry : inMemoryUserStorage.userMap.entrySet()) {
-            if (integerUserEntry.getValue().getId() == id) {
-                user = integerUserEntry.getValue();
-                break;
+        SqlRowSet userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
+
+        if(!userRowsNotFound.next()) {
+            throw new IllegalArgumentException("");
+        }
+
+        // выполняем запрос к базе данных.
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from friendship where user_id = ?", id);
+
+        if (userRows.next()) {
+            do {
+                userFriendsSet.add(Integer.valueOf(userRows.getString("friend_id")));
+            } while (userRows.next());
+        }
+
+        for (Integer friendId : userFriendsSet) {
+            SqlRowSet friendRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", friendId);
+
+            if(friendRows.next()) {
+
+                User user = new User();
+
+                user.setId(Integer.valueOf(friendRows.getString("user_id")));
+                user.setLogin(friendRows.getString("login"));
+                user.setName(friendRows.getString("user_name"));
+                user.setBirthday(LocalDate.parse(friendRows.getString("birthday")));
+                user.setEmail(friendRows.getString("email"));
+
+                userFriendsList.add(user);
             }
         }
 
-        userFriendsSet = user.getFriends();
-
-        for (Map.Entry<Integer, User> integerUserEntry : inMemoryUserStorage.userMap.entrySet()) {
-            if (userFriendsSet.contains(integerUserEntry.getValue().getId())) {
-                userFriendsList.add(integerUserEntry.getValue());
-            }
-        }
         return userFriendsList;
     }
 
     @Override
     public Collection<User> getCommonFriends(Integer id, Integer otherId) {
-        User user;
-        Set<Integer> commonFriends = null;
-        List<User> listCommonFriends = new ArrayList<>();
-        Set<Integer> setId = null;
-        Set<Integer> setOtherId = null;
 
-        for (Map.Entry<Integer, User> integerUserEntry : inMemoryUserStorage.userMap.entrySet()) {
-            if (integerUserEntry.getValue().getId() == id) {
-                setId = integerUserEntry.getValue().getFriends();
-            } else if (integerUserEntry.getValue().getId() == otherId) {
-                setOtherId = integerUserEntry.getValue().getFriends();
+        List<User> userFriendsList = new ArrayList<>();
+        Set<Integer> userFriendsSet = new HashSet<>();
+
+        SqlRowSet userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
+
+        if(!userRowsNotFound.next()) {
+            throw new IllegalArgumentException("");
+        }
+
+        userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", otherId);
+
+        if(!userRowsNotFound.next()) {
+            throw new IllegalArgumentException("");
+        }
+
+        // выполняем запрос к базе данных.
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM friendship WHERE friend_id IN (" +
+                        " SELECT friend_id FROM friendship WHERE user_id = ? INTERSECT " +
+                        "SELECT friend_id FROM friendship WHERE user_id = ? )", id, otherId);
+
+        if (userRows.next()) {
+            do {
+                userFriendsSet.add(Integer.valueOf(userRows.getString("friend_id")));
+            } while (userRows.next());
+        }
+
+        for (Integer friendId : userFriendsSet) {
+            SqlRowSet friendRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", friendId);
+
+            if(friendRows.next()) {
+
+                User user = new User();
+
+                user.setId(Integer.valueOf(friendRows.getString("user_id")));
+                user.setLogin(friendRows.getString("login"));
+                user.setName(friendRows.getString("user_name"));
+                user.setBirthday(LocalDate.parse(friendRows.getString("birthday")));
+                user.setEmail(friendRows.getString("email"));
+
+                userFriendsList.add(user);
             }
         }
 
-        Set<Integer> common = new HashSet<>(setId);
-        common.retainAll(setOtherId);
-
-        if (common.size() != 0) {
-            for (Map.Entry<Integer, User> integerUserEntry : inMemoryUserStorage.userMap.entrySet()) {
-                if (common.contains(integerUserEntry.getValue().getId())) {
-                    listCommonFriends.add(integerUserEntry.getValue());
-                }
-            }
-        }
-        return listCommonFriends;
+        return userFriendsList;
     }
 }
