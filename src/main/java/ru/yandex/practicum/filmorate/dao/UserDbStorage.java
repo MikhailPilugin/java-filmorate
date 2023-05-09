@@ -15,7 +15,6 @@ import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Component
 public class UserDbStorage implements UserStorage {
@@ -35,19 +34,19 @@ public class UserDbStorage implements UserStorage {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users");
 
         // обрабатываем результат выполнения запроса
-            if(userRows.next()) {
-                do {
-                    User user = new User();
+        if (userRows.next()) {
+            do {
+                User user = new User();
 
-                    user.setId(Integer.valueOf(userRows.getString("user_id")));
-                    user.setLogin(userRows.getString("login"));
-                    user.setName(userRows.getString("user_name"));
-                    user.setBirthday(LocalDate.parse(userRows.getString("birthday")));
-                    user.setEmail(userRows.getString("email"));
+                user.setId(Integer.valueOf(userRows.getString("user_id")));
+                user.setLogin(userRows.getString("login"));
+                user.setName(userRows.getString("user_name"));
+                user.setBirthday(LocalDate.parse(userRows.getString("birthday")));
+                user.setEmail(userRows.getString("email"));
 
-                    userMap.put(user.getId(), user);
-                } while (userRows.next());
-            }
+                userMap.put(user.getId(), user);
+            } while (userRows.next());
+        }
 
         return userMap;
     }
@@ -58,7 +57,7 @@ public class UserDbStorage implements UserStorage {
 
         SqlRowSet userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
 
-        if(!userRowsNotFound.next()) {
+        if (!userRowsNotFound.next()) {
             throw new IllegalArgumentException("");
         }
 
@@ -66,7 +65,7 @@ public class UserDbStorage implements UserStorage {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
 
         // обрабатываем результат выполнения запроса
-        if(userRows.next()) {
+        if (userRows.next()) {
             user.setId(Integer.valueOf(userRows.getString("user_id")));
             user.setLogin(userRows.getString("login"));
             user.setName(userRows.getString("user_name"));
@@ -120,19 +119,19 @@ public class UserDbStorage implements UserStorage {
     public User updateUser(User user) throws ValidationException {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", user.getId());
 
-        if(!userRows.next()) {
+        if (!userRows.next()) {
             throw new IllegalArgumentException("");
         }
 
         String sqlQuery = "update users set " +
-                    "login = ?, user_name = ?, birthday = ?, email = ? " +
-                    "where user_id = ?";
-            jdbcTemplate.update(sqlQuery
-                    , user.getLogin()
-                    , user.getName()
-                    , user.getBirthday()
-                    , user.getEmail()
-                    , user.getId());
+                "login = ?, user_name = ?, birthday = ?, email = ? " +
+                "where user_id = ?";
+        jdbcTemplate.update(sqlQuery
+                , user.getLogin()
+                , user.getName()
+                , user.getBirthday()
+                , user.getEmail()
+                , user.getId());
 
         return user;
     }
@@ -141,7 +140,7 @@ public class UserDbStorage implements UserStorage {
     public User deleteUser(User user) throws ValidationException {
         SqlRowSet userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", user.getId());
 
-        if(!userRowsNotFound.next()) {
+        if (!userRowsNotFound.next()) {
             throw new IllegalArgumentException("");
         }
 

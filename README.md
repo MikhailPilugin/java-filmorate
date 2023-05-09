@@ -1,4 +1,4 @@
-ыегв# Схема БД приложения Filmorate
+## Схема БД приложения Filmorate
 
 
 ![Схема БД приложения Filmorate](documents/DB_filmorate_scheme.png)

@@ -13,7 +13,7 @@ import java.util.*;
 
 @Service
 public class UserService implements UserServiceInterface {
-    private final Logger log = LoggerFactory.getLogger(UserDbStorage.class);
+    private final Logger log = LoggerFactory.getLogger(UserService.class);
     private final UserDbStorage userDbStorage;
 
     private final JdbcTemplate jdbcTemplate;
@@ -30,7 +30,7 @@ public class UserService implements UserServiceInterface {
 
         boolean isFriendsAdd = false;
 
-        if(!userRowsOne.next()) {
+        if (!userRowsOne.next()) {
             throw new IllegalArgumentException("");
         }
 
@@ -60,7 +60,7 @@ public class UserService implements UserServiceInterface {
 
         boolean isFriendsDelete = false;
 
-        if(!userRowsOne.next()) {
+        if (!userRowsOne.next()) {
             throw new IllegalArgumentException("");
         }
 
@@ -86,7 +86,7 @@ public class UserService implements UserServiceInterface {
 
         SqlRowSet userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
 
-        if(!userRowsNotFound.next()) {
+        if (!userRowsNotFound.next()) {
             throw new IllegalArgumentException("");
         }
 
@@ -102,7 +102,7 @@ public class UserService implements UserServiceInterface {
         for (Integer friendId : userFriendsSet) {
             SqlRowSet friendRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", friendId);
 
-            if(friendRows.next()) {
+            if (friendRows.next()) {
 
                 User user = new User();
 
@@ -127,20 +127,20 @@ public class UserService implements UserServiceInterface {
 
         SqlRowSet userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
 
-        if(!userRowsNotFound.next()) {
+        if (!userRowsNotFound.next()) {
             throw new IllegalArgumentException("");
         }
 
         userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", otherId);
 
-        if(!userRowsNotFound.next()) {
+        if (!userRowsNotFound.next()) {
             throw new IllegalArgumentException("");
         }
 
         // выполняем запрос к базе данных.
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM friendship WHERE friend_id IN (" +
-                        " SELECT friend_id FROM friendship WHERE user_id = ? INTERSECT " +
-                        "SELECT friend_id FROM friendship WHERE user_id = ? )", id, otherId);
+                " SELECT friend_id FROM friendship WHERE user_id = ? INTERSECT " +
+                "SELECT friend_id FROM friendship WHERE user_id = ? )", id, otherId);
 
         if (userRows.next()) {
             do {
@@ -151,7 +151,7 @@ public class UserService implements UserServiceInterface {
         for (Integer friendId : userFriendsSet) {
             SqlRowSet friendRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", friendId);
 
-            if(friendRows.next()) {
+            if (friendRows.next()) {
 
                 User user = new User();
 

@@ -7,7 +7,9 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -28,11 +30,12 @@ public class Film {
     private Set<Integer> likes;
     private int rate;
 
-    private String genre;
-    private String mpaRating;
+    private Mpa mpa;
+    private List<Genres> genres;
 
     public Film() {
         this.likes = new HashSet<>();
+        this.genres = new ArrayList<>();
     }
 
     public int setLikes(Integer id) {
@@ -56,5 +59,4 @@ public class Film {
         }
         return status;
     }
-
 }
