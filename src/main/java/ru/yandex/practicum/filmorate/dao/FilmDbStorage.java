@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.dao;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -15,9 +16,7 @@ import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class FilmDbStorage implements FilmStorage {
@@ -31,29 +30,55 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Map<Integer, Film> getFilms() {
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select * from mpa_rating");
         Map<Integer, Film> filmMap = new HashMap<>();
+
+      //  SqlRowSet genresRows = jdbcTemplate.queryForRowSet("select * from genre");
 
         // выполняем запрос к базе данных.
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from film");
 
+        int mpaId = 0;
+        String mpaName = "";
+
         // обрабатываем результат выполнения запроса
         if (filmRows.next()) {
             do {
-                int mpaId = 0;
-                String mpaName = null;
+                SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select * from mpa_rating where mpa_id = ?", filmRows.getInt("mpa_id"));
+
+                SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select f.film_id, fg.genre_id, g.genre_name " +
+                "from film_genres fg join genre g on fg.genre_id = g.genre_id " +
+                "join film f on fg.film_id = f.film_id where f.film_id = ?", filmRows.getInt("film_id"));
 
                 do {
                     if (mpaRows.next()) {
                         mpaId = mpaRows.getInt("mpa_id");
                         mpaName = mpaRows.getString("mpa_name");
                     }
-                } while (mpaId != filmRows.getInt("mpa_id"));
+                } while (mpaId != mpaRows.getInt("mpa_id"));
+
+                Genres genre = new Genres();
+                List<Genres> genresList = new ArrayList<>();
+                int genreId = 0;
+                String genreName = "";
+
+                if (genreRows.next()) {
+                    genreId = genreRows.getInt("genre_id");
+                    genreName = genreRows.getString("genre_name");
+                }
+
 
                 Film film = new Film();
                 Mpa mpa = new Mpa();
                 mpa.setId(mpaId);
                 mpa.setName(mpaName);
+
+                if (genreId > 0) {
+                    genre.setId(genreId);
+                    genre.setName(genreName);
+                    genresList.add(genre);
+                    film.setGenres(genresList);
+                }
+
 
                 film.setId(Integer.valueOf(filmRows.getString("film_id")));
                 film.setName(filmRows.getString("film_name"));
@@ -75,6 +100,82 @@ public class FilmDbStorage implements FilmStorage {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select * from mpa_rating");
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from film where film_id = ?", id);
         Film film = new Film();
+        List<Genres> genresList = new ArrayList<>();
+
+        SqlRowSet isGenresRowsFound = jdbcTemplate.queryForRowSet("select * from film_genres where film_id = ?", id);
+
+        if (isGenresRowsFound.next()) {
+            List<Integer> genreIdArray = new ArrayList<>();
+            do {
+                int idGenreTmp = isGenresRowsFound.getInt("genre_id");
+                if (!genreIdArray.contains(idGenreTmp)) {
+                    genreIdArray.add(idGenreTmp);
+                }
+            } while (isGenresRowsFound.next());
+
+            Map<Integer, String> genreMap = new HashMap<>();
+            List<Genres> newGenresList = new ArrayList<>();
+
+            SqlRowSet genresRows = jdbcTemplate.queryForRowSet("select * from genre");
+            if (genresRows.next()) {
+                do {
+                    int genreIdtmp = genresRows.getInt("genre_id");
+                    String genreNameTmp = genresRows.getString("genre_name");
+                    genreMap.put(genreIdtmp, genreNameTmp);
+                } while (genresRows.next());
+            }
+
+            for (int i = 0; i < genreIdArray.size(); i++) {
+                Genres genre = new Genres();
+
+                int genreIdTmp = genreIdArray.get(i);
+                genre.setId(genreIdTmp);
+
+                for (Map.Entry<Integer, String> integerStringEntry : genreMap.entrySet()) {
+                    if (integerStringEntry.getKey() == genreIdTmp) {
+                        genre.setName(integerStringEntry.getValue());
+                    }
+                }
+
+                newGenresList.add(genre);
+            }
+
+            film.setGenres(newGenresList);
+
+
+//            for (int i = 0; i < genreIdArray.size(); i++) {
+//                int idGenre = genreIdArray.get(i);
+//                String name = "";
+//
+//                for (Map.Entry<Integer, String> integerStringEntry : genreMap.entrySet()) {
+//                    if (idGenre == integerStringEntry.getKey()) {
+//                        name = integerStringEntry.getValue();
+//                        break;
+//                    }
+//                }
+//                Genres newGenre = new Genres();
+//                newGenre.setId(idGenre);
+//                newGenre.setName(name);
+//                newGenresList.add(newGenre);
+//            }
+
+
+//            SqlRowSet genresNameRows = jdbcTemplate.queryForRowSet("select genre_name from genre where genre_id = ?", genreId);
+//            String genreName = "";
+//
+//            if (genresNameRows.next()) {
+//                genreName = genresNameRows.getString("genre_name");
+//            }
+
+
+
+//            Genres genres = new Genres();
+//
+//            genres.setId(genreId);
+//            genres.setName(genreName);
+//            genresList.add(genres);
+//            film.setGenres(newGenresList);
+        }
 
         if (filmRows.next()) {
             int mpaId = 0;
@@ -108,8 +209,13 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) throws ValidationException {
         List<Genres> genres = film.getGenres();
+        int genreId = 0;
 
         if (genres.size() > 0) {
+            for (Genres genre : genres) {
+                genreId = genre.getId();
+            }
+
             film.setGenres(genres);
         }
 
@@ -137,14 +243,93 @@ public class FilmDbStorage implements FilmStorage {
 
         film.setId(keyHolder.getKey().intValue());
 
+        if (genres.size() > 0) {
+            String sqlQueryGenres = "insert into film_genres (film_id, genre_id) " +
+                    "values (?, ?)";
+            jdbcTemplate.update(sqlQueryGenres,
+                    keyHolder.getKey().intValue(),
+                    genreId);
+        }
         return film;
     }
 
     @Override
     public Film updateFilm(Film film) throws ValidationException {
         SqlRowSet getLastIdRows = jdbcTemplate.queryForRowSet("select * from film order by film_id desc limit 1");
+        int genreId = 0;
+        Map<Integer, String> genreMap = new HashMap<>();
 
-        List<Genres> genres = film.getGenres();
+        SqlRowSet genresRows = jdbcTemplate.queryForRowSet("select * from genre");
+        if (genresRows.next()) {
+            do {
+                int genreIdtmp = genresRows.getInt("genre_id");
+                String genreNameTmp = genresRows.getString("genre_name");
+                genreMap.put(genreIdtmp, genreNameTmp);
+            } while (genresRows.next());
+        }
+
+        List<Genres> genresList = film.getGenres();
+        if (genresList.size() > 0) {
+            List<Integer> genreIdArray = new ArrayList<>();
+            List<Genres> newGenresList = new ArrayList<>();
+            for (Genres genre : genresList) {
+                genreId = genre.getId();
+                if (!genreIdArray.contains(genreId)) {
+                    genreIdArray.add(genreId);
+                }
+            }
+
+            for (int i = 0; i < genreIdArray.size(); i++) {
+                int id = genreIdArray.get(i);
+                String name = "";
+
+                for (Map.Entry<Integer, String> integerStringEntry : genreMap.entrySet()) {
+                    if (id == integerStringEntry.getKey()) {
+                        name = integerStringEntry.getValue();
+                        break;
+                    }
+                }
+                Genres newGenre = new Genres();
+                newGenre.setId(id);
+                newGenre.setName(name);
+                newGenresList.add(newGenre);
+
+                String sqlQuery = "delete from film_genres where film_id = ?";
+                jdbcTemplate.update(sqlQuery, film.getId());
+
+
+                for (Genres genres : newGenresList) {
+                    String sqlQueryGenres = "insert into film_genres (film_id, genre_id) " +
+                            "values (?, ?)";
+                    jdbcTemplate.update(sqlQueryGenres,
+                            film.getId(),
+                            genres.getId());
+                }
+            }
+
+
+
+            film.setGenres(newGenresList);
+
+            if (genresList.size() > 0) {
+                String sqlQueryGenres = "insert into film_genres (film_id, genre_id) " +
+                        "values (?, ?)";
+                jdbcTemplate.update(sqlQueryGenres,
+                        film.getId(),
+                        genreId);
+            }
+        } else {
+            SqlRowSet getFilmIdGenresRows = jdbcTemplate.queryForRowSet("select * from film_genres where film_id = ?", film.getId());
+
+            if (getFilmIdGenresRows.next()) {
+                int filmId = getFilmIdGenresRows.getInt("film_id");
+
+                if (filmId > 0) {
+                    String sqlQuery = "delete from film_genres where film_id = ?";
+                    jdbcTemplate.update(sqlQuery, filmId);
+                }
+            }
+        }
 
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from film where film_id = ?", film.getId());
 
@@ -158,7 +343,6 @@ public class FilmDbStorage implements FilmStorage {
         Mpa mpa = new Mpa();
         mpa.setId(film.getMpa().getId());
         film.setMpa(mpa);
-        film.setGenres(genres);
 
         if (mpaRows.next()) {
             mpa.setName(mpaRows.getString("mpa_name"));

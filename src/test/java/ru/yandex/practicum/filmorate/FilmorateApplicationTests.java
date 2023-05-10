@@ -1,32 +1,32 @@
 package ru.yandex.practicum.filmorate;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import ru.yandex.practicum.filmorate.controller.FilmController;
-import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.dao.UserDbStorage;
+import ru.yandex.practicum.filmorate.model.User;
+
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-class FilmorateApplicationTests {
-
-	@Autowired
-	private FilmController filmController;
-
-	@Autowired
-	private UserController userController;
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+class FilmoRateApplicationTests {
+	private final UserDbStorage userStorage;
 
 	@Test
-	void contextLoadsFilm() throws Exception {
-		assertThat(filmController).isNotNull();
+	public void testFindUserById() {
+
+		Optional<User> userOptional = Optional.ofNullable(userStorage.getUserById(1));
+
+		assertThat(userOptional)
+				.isPresent()
+				.hasValueSatisfying(user ->
+						assertThat(user).hasFieldOrPropertyWithValue("id", 1)
+				);
 	}
-
-	@Test
-	void contextLoadsUser() throws Exception {
-		assertThat(userController).isNotNull();
-	}
-
-
-
 }
