@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.FilmServiceImpl;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -16,12 +16,12 @@ import java.util.List;
 @ResponseBody
 public class FilmController {
     private FilmDbStorage filmDbStorage;
-    private FilmService filmService;
+    private FilmServiceImpl filmServiceImpl;
 
     @Autowired
-    public FilmController(FilmDbStorage filmDbStorage, FilmService filmService) {
+    public FilmController(FilmDbStorage filmDbStorage, FilmServiceImpl filmServiceImpl) {
         this.filmDbStorage = filmDbStorage;
-        this.filmService = filmService;
+        this.filmServiceImpl = filmServiceImpl;
     }
 
     @GetMapping("/films")
@@ -51,17 +51,17 @@ public class FilmController {
 
     @PutMapping("/films/{id}/like/{userId}")
     public boolean addLike(@PathVariable Integer id, @PathVariable Integer userId) {
-        return filmService.addLike(id, userId);
+        return filmServiceImpl.addLike(id, userId);
     }
 
     @DeleteMapping("/films/{id}/like/{userId}")
     public boolean delRate(@PathVariable Integer id, @PathVariable Integer userId) {
-        return filmService.delLike(id, userId);
+        return filmServiceImpl.delLike(id, userId);
     }
 
     @GetMapping("/films/popular")
     public List<Film> getPopularFilms(@RequestParam(required = false) Integer count) {
-        return filmService.getPopularFilms(count);
+        return filmServiceImpl.getPopularFilms(count);
     }
 
     @ExceptionHandler

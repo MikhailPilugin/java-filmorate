@@ -30,10 +30,8 @@ public class UserDbStorage implements UserStorage {
     public Map<Integer, User> getUsers() {
         Map<Integer, User> userMap = new HashMap<>();
 
-        // выполняем запрос к базе данных.
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users");
 
-        // обрабатываем результат выполнения запроса
         if (userRows.next()) {
             do {
                 User user = new User();
@@ -61,10 +59,8 @@ public class UserDbStorage implements UserStorage {
             throw new IllegalArgumentException("");
         }
 
-        // выполняем запрос к базе данных.
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
 
-        // обрабатываем результат выполнения запроса
         if (userRows.next()) {
             user.setId(Integer.valueOf(userRows.getString("user_id")));
             user.setLogin(userRows.getString("login"));

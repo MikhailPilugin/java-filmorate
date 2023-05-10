@@ -4,14 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genres;
-import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+@Repository
 public class GenresDbStorage {
     private final Logger log = LoggerFactory.getLogger(GenresDbStorage.class);
 
@@ -21,13 +20,11 @@ public class GenresDbStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Map<Integer, Genres> getGenres() {
+    public Map<Integer, Genres> getAll() {
         Map<Integer, Genres> genresMap = new HashMap<>();
 
-        // выполняем запрос к базе данных.
         SqlRowSet genresRows = jdbcTemplate.queryForRowSet("select * from genre");
 
-        // обрабатываем результат выполнения запроса
         if (genresRows.next()) {
             do {
                 Genres genres = new Genres();
@@ -41,17 +38,16 @@ public class GenresDbStorage {
         return genresMap;
     }
 
-    public Genres getGenresById(Integer id) {
+    public Genres getById(Integer id) {
         Genres genres = new Genres();
 
         SqlRowSet genresRows = jdbcTemplate.queryForRowSet("select * from genre where genre_id = ?", id);
 
-        // обрабатываем результат выполнения запроса
         if (genresRows.next()) {
             genres.setId(genresRows.getInt("genre_id"));
             genres.setName(genresRows.getString("genre_name"));
         } else {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("genre id not found");
         }
 
         return genres;

@@ -6,23 +6,21 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.service.UserServiceImpl;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.Optional;
 
 @RestController
 @ResponseBody
 public class UserController {
     private UserDbStorage userDbStorage;
-    private UserService userService;
+    private UserServiceImpl userServiceImpl;
 
     @Autowired
-    public UserController(UserDbStorage userDbStorage, UserService userService) {
+    public UserController(UserDbStorage userDbStorage, UserServiceImpl userServiceImpl) {
         this.userDbStorage = userDbStorage;
-        this.userService = userService;
+        this.userServiceImpl = userServiceImpl;
     }
 
     @GetMapping("/users")
@@ -52,22 +50,22 @@ public class UserController {
 
     @PutMapping("/users/{id}/friends/{friendId}")
     public boolean addFriend(@PathVariable Integer id, @PathVariable Integer friendId) throws ValidationException {
-        return userService.addFriend(id, friendId);
+        return userServiceImpl.addFriend(id, friendId);
     }
 
     @DeleteMapping("/users/{id}/friends/{friendId}")
     public boolean delFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
-        return userService.delFriend(id, friendId);
+        return userServiceImpl.delFriend(id, friendId);
     }
 
     @GetMapping("/users/{id}/friends")
     public Collection<User> getFriends(@PathVariable int id) {
-        return userService.getFriend(id);
+        return userServiceImpl.getFriend(id);
     }
 
     @GetMapping("/users/{id}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
-        return userService.getCommonFriends(id, otherId);
+        return userServiceImpl.getCommonFriends(id, otherId);
     }
 
     @ExceptionHandler
