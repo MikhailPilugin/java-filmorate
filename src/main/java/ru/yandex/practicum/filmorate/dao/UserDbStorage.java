@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -16,7 +17,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
+@Repository
 public class UserDbStorage implements UserStorage {
     private final Logger log = LoggerFactory.getLogger(UserDbStorage.class);
 
@@ -122,12 +123,12 @@ public class UserDbStorage implements UserStorage {
         String sqlQuery = "update users set " +
                 "login = ?, user_name = ?, birthday = ?, email = ? " +
                 "where user_id = ?";
-        jdbcTemplate.update(sqlQuery
-                , user.getLogin()
-                , user.getName()
-                , user.getBirthday()
-                , user.getEmail()
-                , user.getId());
+        jdbcTemplate.update(sqlQuery,
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday(),
+                user.getEmail(),
+                user.getId());
 
         return user;
     }
