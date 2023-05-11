@@ -38,7 +38,7 @@ public class GenresDbStorage {
         return genresMap;
     }
 
-    public Genres getById(Integer id) {
+    public Genres getById(Integer id) throws IllegalArgumentException {
         Genres genres = new Genres();
 
         SqlRowSet genresRows = jdbcTemplate.queryForRowSet("select * from genre where genre_id = ?", id);

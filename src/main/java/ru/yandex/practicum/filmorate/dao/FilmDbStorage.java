@@ -93,7 +93,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film getFilmById(Integer id) throws ValidationException {
+    public Film getFilmById(Integer id) throws IllegalArgumentException {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select * from mpa_rating");
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from film where film_id = ?", id);
         Film film = new Film();
@@ -214,7 +214,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film updateFilm(Film film) throws ValidationException {
+    public Film updateFilm(Film film) throws IllegalArgumentException {
         SqlRowSet getLastIdRows = jdbcTemplate.queryForRowSet("select * from film order by film_id desc limit 1");
         int genreId = 0;
         Map<Integer, String> genreMap = new HashMap<>();

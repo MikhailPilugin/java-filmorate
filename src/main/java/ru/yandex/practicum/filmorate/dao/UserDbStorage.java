@@ -50,13 +50,13 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(Integer id) {
+    public User getUserById(Integer id) throws IllegalArgumentException {
         User user = new User();
 
         SqlRowSet userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
 
         if (!userRowsNotFound.next()) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("user not found");
         }
 
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
@@ -112,11 +112,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User updateUser(User user) throws ValidationException {
+    public User updateUser(User user) throws IllegalArgumentException {
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", user.getId());
 
         if (!userRows.next()) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("user not found");
         }
 
         String sqlQuery = "update users set " +
@@ -133,11 +133,11 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public User deleteUser(User user) throws ValidationException {
+    public User deleteUser(User user) throws IllegalArgumentException {
         SqlRowSet userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", user.getId());
 
         if (!userRowsNotFound.next()) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("user not found");
         }
 
         String sqlQueryOne = "delete from users where user_id = ?";

@@ -39,13 +39,13 @@ public class MpaDbStorage {
         return mpaMap;
     }
 
-    public Mpa getMpaById(Integer id) {
+    public Mpa getMpaById(Integer id) throws IllegalArgumentException {
         Mpa mpa = new Mpa();
 
         SqlRowSet mpaRowsNotFound = jdbcTemplate.queryForRowSet("select * from mpa_rating where mpa_id = ?", id);
 
         if (!mpaRowsNotFound.next()) {
-            throw new IllegalArgumentException("");
+            throw new IllegalArgumentException("mpa not found");
         }
 
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select * from mpa_rating where mpa_id = ?", id);
