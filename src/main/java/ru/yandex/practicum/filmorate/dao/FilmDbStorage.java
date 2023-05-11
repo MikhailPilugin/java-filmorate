@@ -309,14 +309,14 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "update film set " +
                 "film_name = ?, release_date = ?, description = ?, duration = ?, likes = ?, mpa_id = ?" +
                 " where film_id = ?";
-        jdbcTemplate.update(sqlQuery
-                , film.getName()
-                , film.getReleaseDate()
-                , film.getDescription()
-                , film.getDuration()
-                , film.getRate()
-                , film.getMpa().getId()
-                , film.getId());
+        jdbcTemplate.update(sqlQuery,
+                film.getName(),
+                film.getReleaseDate(),
+                film.getDescription(),
+                film.getDuration(),
+                film.getRate(),
+                film.getMpa().getId(),
+                film.getId());
 
         return film;
     }
