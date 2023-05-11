@@ -43,9 +43,9 @@ public class FilmServiceImpl implements FilmService {
 
 
         String sqlQueryTwo = "update film set likes = ? where film_id = ?";
-        likeIsAdded = jdbcTemplate.update(sqlQueryTwo
-                , likes + 1
-                , id) > 0;
+        likeIsAdded = jdbcTemplate.update(sqlQueryTwo,
+                likes + 1,
+                id) > 0;
 
         return likeIsAdded;
     }
@@ -69,9 +69,9 @@ public class FilmServiceImpl implements FilmService {
         }
 
         String sqlQueryTwo = "update film set likes = ? where film_id = ?";
-        likeIsDeleted = jdbcTemplate.update(sqlQueryTwo
-                , likes - 1
-                , id) > 0;
+        likeIsDeleted = jdbcTemplate.update(sqlQueryTwo,
+                likes - 1,
+                id) > 0;
 
         return likeIsDeleted;
     }

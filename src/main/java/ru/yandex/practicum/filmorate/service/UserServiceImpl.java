@@ -41,10 +41,10 @@ public class UserServiceImpl implements UserService {
         String sqlQueryOne = "insert into friendship (user_id, friend_id, status) " +
                 "values (?, ?, ?)";
 
-        int statusOne = jdbcTemplate.update(sqlQueryOne
-                , id
-                , friendId
-                , "CONFIRMED");
+        int statusOne = jdbcTemplate.update(sqlQueryOne,
+                id,
+                friendId,
+                "CONFIRMED");
 
         if (statusOne > 0) {
             isFriendsAdd = true;
