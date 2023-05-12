@@ -1,4 +1,4 @@
-ыегв# Схема БД приложения Filmorate
+## Схема БД приложения Filmorate
 
 
 ![Схема БД приложения Filmorate](documents/DB_filmorate_scheme.png)
@@ -77,7 +77,7 @@
     ```
     SELECT *
         FROM friendship
-        WHERE user_id IN (
+        WHERE friend_id IN (
             SELECT friend_id
             FROM friendship
             WHERE user_id = '1' AND status = 'CONFIRMED'

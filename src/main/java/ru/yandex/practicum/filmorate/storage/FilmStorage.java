@@ -8,7 +8,7 @@ import java.util.Map;
 public interface FilmStorage {
     public Map<Integer, Film> getFilms();
 
-    public Film getFilmById(Integer id);
+    public Film getFilmById(Integer id) throws ValidationException;
 
     public Film addFilm(Film film) throws ValidationException;
 

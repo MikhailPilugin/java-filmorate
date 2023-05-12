@@ -3,10 +3,10 @@ package ru.yandex.practicum.filmorate.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.service.FilmServiceImpl;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -15,53 +15,53 @@ import java.util.List;
 @RestController
 @ResponseBody
 public class FilmController {
-    private InMemoryFilmStorage inMemoryFilmStorage;
-    private FilmService filmService;
+    private FilmDbStorage filmDbStorage;
+    private FilmServiceImpl filmServiceImpl;
 
     @Autowired
-    public FilmController(InMemoryFilmStorage inMemoryFilmStorage, FilmService filmService) {
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
-        this.filmService = filmService;
+    public FilmController(FilmDbStorage filmDbStorage, FilmServiceImpl filmServiceImpl) {
+        this.filmDbStorage = filmDbStorage;
+        this.filmServiceImpl = filmServiceImpl;
     }
 
     @GetMapping("/films")
     public Collection<Film> getFilms() {
-        return inMemoryFilmStorage.getFilms().values();
+        return filmDbStorage.getFilms().values();
     }
 
     @GetMapping("/films/{id}")
     public Film getFilm(@PathVariable Integer id) throws ValidationException {
-        return inMemoryFilmStorage.getFilmById(id);
+        return filmDbStorage.getFilmById(id);
     }
 
     @PostMapping("/films")
     public Film addFilm(@RequestBody @Valid Film film) throws ValidationException {
-        return inMemoryFilmStorage.addFilm(film);
+        return filmDbStorage.addFilm(film);
     }
 
     @PutMapping("/films")
     public Film updateFilm(@RequestBody @Valid Film film) throws ValidationException {
-        return inMemoryFilmStorage.updateFilm(film);
+        return filmDbStorage.updateFilm(film);
     }
 
     @DeleteMapping("/films")
     public Film deleteFilm(@RequestBody @Valid Film film) throws ValidationException {
-        return inMemoryFilmStorage.deleteFilm(film);
+        return filmDbStorage.deleteFilm(film);
     }
 
     @PutMapping("/films/{id}/like/{userId}")
     public boolean addLike(@PathVariable Integer id, @PathVariable Integer userId) {
-        return filmService.addLike(id, userId);
+        return filmServiceImpl.addLike(id, userId);
     }
 
     @DeleteMapping("/films/{id}/like/{userId}")
     public boolean delRate(@PathVariable Integer id, @PathVariable Integer userId) {
-        return filmService.delLike(id, userId);
+        return filmServiceImpl.delLike(id, userId);
     }
 
     @GetMapping("/films/popular")
     public List<Film> getPopularFilms(@RequestParam(required = false) Integer count) {
-        return filmService.getPopularFilms(count);
+        return filmServiceImpl.getPopularFilms(count);
     }
 
     @ExceptionHandler
