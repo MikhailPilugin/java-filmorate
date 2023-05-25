@@ -50,13 +50,13 @@ public class ReviewController {
     }
 
     @PostMapping("/reviews/{reviewId}/like/{userId}")
-    public boolean likeReview(@PathVariable Integer reviewId, @PathVariable Integer userId){
+    public boolean likeReview(@PathVariable Integer reviewId, @PathVariable Integer userId) {
         return reviewService.likeReview(reviewId, userId, true);
     }
 
 
     @PostMapping("/reviews/{reviewId}/dislike/{userId}")
-    public boolean dislikeReview(@PathVariable Integer reviewId, @PathVariable Integer userId){
+    public boolean dislikeReview(@PathVariable Integer reviewId, @PathVariable Integer userId) {
         return reviewService.likeReview(reviewId, userId, false);
     }
 

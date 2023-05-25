@@ -7,7 +7,7 @@ import ru.yandex.practicum.filmorate.model.Review;
 import java.util.List;
 
 @Service
-public class ReviewServiceImpl implements ReviewService{
+public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewDbStorage reviewDbStorage;
 
@@ -49,7 +49,7 @@ public class ReviewServiceImpl implements ReviewService{
     }
 
     @Override
-    public boolean likeReview(Integer reviewId, Integer userId, Boolean isLike){
+    public boolean likeReview(Integer reviewId, Integer userId, Boolean isLike) {
         return reviewDbStorage.likeReview(reviewId, userId, isLike);
     }
 }

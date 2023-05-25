@@ -42,11 +42,9 @@ public class ReviewDbStorage {
             });
 
             return review;
-        }
-        catch(EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             throw new IllegalArgumentException("Review not found");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error getting review by id: {}", reviewId, e);
             throw e;
         }
@@ -70,8 +68,7 @@ public class ReviewDbStorage {
 
             review.setId(keyHolder.getKey().intValue());
             return review;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error adding review for filmId: {}, userId: {}", filmId, userId, e);
             throw e;
         }
@@ -93,11 +90,9 @@ public class ReviewDbStorage {
 
             review.setId(keyHolder.getKey().intValue());
             return review;
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             throw new IllegalArgumentException("Review with id " + reviewId + " not found");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error updating review by id: {}", reviewId, e);
             throw e;
         }
@@ -126,11 +121,9 @@ public class ReviewDbStorage {
                             rs.getInt("likes"),
                             rs.getInt("dislikes")
                     ));
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             throw new IllegalArgumentException("Film with id " + filmId + " not found");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error getting reviews by film id: {}", filmId, e);
             throw e;
         }
@@ -151,18 +144,16 @@ public class ReviewDbStorage {
                             rs.getInt("likes"),
                             rs.getInt("dislikes")
                     ));
-        }
-        catch (EmptyResultDataAccessException e) {
+        } catch (EmptyResultDataAccessException e) {
             throw new IllegalArgumentException("User with id " + userId + " not found");
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error getting reviews by user id: {}", userId, e);
             throw e;
         }
     }
 
-    public boolean likeReview(Integer reviewId, Integer userId, Boolean isLike){
-        if(isLike)
+    public boolean likeReview(Integer reviewId, Integer userId, Boolean isLike) {
+        if (isLike)
             log.info("Adding like for reviewId: {}, userId: {}", reviewId, userId);
         else
             log.info("Adding dislike for reviewId: {}, userId: {}", reviewId, userId);
@@ -170,8 +161,7 @@ public class ReviewDbStorage {
         try {
             jdbcTemplate.update(sql, reviewId, userId, isLike);
             return true;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error adding like for reviewId: {}, userId: {}", reviewId, userId, e);
             throw e;
         }
