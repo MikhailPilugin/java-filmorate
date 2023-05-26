@@ -323,7 +323,6 @@ public class FilmDbStorage implements FilmStorage {
 
         film.setDirectors(directors);
 
-
         return film;
     }
 
