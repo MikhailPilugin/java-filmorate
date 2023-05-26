@@ -8,11 +8,15 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -146,4 +150,20 @@ public class UserDbStorage implements UserStorage {
 
         return user;
     }
+
+    public Collection<Feed> getUserFeed(int userId) {
+        return jdbcTemplate.query("SELECT * FROM user_feed WHERE user_id = ?", this::mapRowToFeed, userId);
+    }
+
+    private Feed mapRowToFeed(ResultSet rs, int rowNum) throws SQLException {
+        return Feed.builder()
+                .userId(rs.getInt("user_id"))
+                .eventId(rs.getInt("event_id"))
+                .entityId(rs.getInt("entity_id"))
+                .eventType(rs.getString("event_type"))
+                .operation(rs.getString("operation"))
+                .timestamp(rs.getInt("timestamp"))
+                .build();
+    }
+
 }

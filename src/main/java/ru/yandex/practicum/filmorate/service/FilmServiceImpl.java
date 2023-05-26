@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.UserFeedStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -17,12 +18,14 @@ import java.util.List;
 public class FilmServiceImpl implements FilmService {
     private final Logger log = LoggerFactory.getLogger(FilmServiceImpl.class);
     private final FilmDbStorage filmDbStorage;
+    private final UserFeedStorage userFeedStorage;
 
     private final JdbcTemplate jdbcTemplate;
 
-    public FilmServiceImpl(FilmDbStorage filmDbStorage, JdbcTemplate jdbcTemplate) {
+    public FilmServiceImpl(FilmDbStorage filmDbStorage, JdbcTemplate jdbcTemplate, UserFeedStorage userFeedStorage) {
         this.filmDbStorage = filmDbStorage;
         this.jdbcTemplate = jdbcTemplate;
+        this.userFeedStorage = userFeedStorage;
     }
 
     @Override
@@ -46,6 +49,8 @@ public class FilmServiceImpl implements FilmService {
         likeIsAdded = jdbcTemplate.update(sqlQueryTwo,
                 likes + 1,
                 id) > 0;
+
+        userFeedStorage.likeEvent(userId, id, "ADD");
 
         return likeIsAdded;
     }
@@ -72,6 +77,8 @@ public class FilmServiceImpl implements FilmService {
         likeIsDeleted = jdbcTemplate.update(sqlQueryTwo,
                 likes - 1,
                 id) > 0;
+
+        userFeedStorage.likeEvent(userId, id, "REMOVE");
 
         return likeIsDeleted;
     }
