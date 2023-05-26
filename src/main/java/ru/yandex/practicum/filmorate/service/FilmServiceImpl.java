@@ -154,6 +154,6 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public List<Film> searchFilms(String query, List<String> by) {
 
-        return filmDbStorage.searchFilms(query,by);
+        return filmDbStorage.searchFilms(query, by);
     }
 }
