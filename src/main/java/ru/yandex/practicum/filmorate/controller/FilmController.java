@@ -64,6 +64,11 @@ public class FilmController {
         return filmServiceImpl.getPopularFilms(count);
     }
 
+    @GetMapping("/films/search")
+    public List<Film> searchFilms(@RequestParam String query, @RequestParam List<String> by ) {
+        return filmServiceImpl.searchFilms(query,by);
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleValidationException(final ValidationException e) {

@@ -150,4 +150,10 @@ public class FilmServiceImpl implements FilmService {
         }
         return allRatedFilms;
     }
+
+    @Override
+    public List<Film> searchFilms(String query, List<String> by) {
+
+        return filmDbStorage.searchFilms(query,by);
+    }
 }

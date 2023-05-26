@@ -1,13 +1,17 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -28,6 +32,124 @@ public class FilmDbStorage implements FilmStorage {
 
     public FilmDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+
+    @SneakyThrows
+    @Override
+    public List<Film> searchFilms(String query, List<String> by) {
+
+        String sqlQuery = "";
+        List<Object> params = new ArrayList<>();
+
+        if (by.size() > 2) {
+            throw new NotFoundException(HttpStatus.BAD_REQUEST, "wrong parameters");
+        } else if (by.get(0).equals("title") && by.get(1).equals("director")) {
+            sqlQuery = "SELECT FILM.film_id, film_name, FILM.description, release_date, duration, FILM.mpa_id, MPA_RATING.mpa_name, likes, D.director_name " +
+                    "FROM FILM " +
+                    "LEFT OUTER JOIN MPA_RATING ON MPA_RATING.MPA_ID = FILM.mpa_id " +
+                    "LEFT OUTER JOIN FILM_DIRECTORS FD ON FILM.film_id = FD.film_id " +
+                    "LEFT OUTER JOIN DIRECTORS D ON FD.director_id = D.director_id " +
+                    "WHERE LOWER(director_name) LIKE ? OR LOWER(film_name) LIKE ? " +
+                    "ORDER BY film_id DESC";
+            params.add("%" + query.toLowerCase() + "%");
+            params.add("%" + query.toLowerCase() + "%");
+        } else if (by.size() == 1) {
+            if (by.get(0).equals("title")) {
+                sqlQuery = "SELECT FILM.film_id, film_name, FILM.description, release_date, duration, FILM.mpa_id, MPA_RATING.mpa_name, likes, D.director_name " +
+                        "FROM FILM " +
+                        "LEFT OUTER JOIN MPA_RATING ON MPA_RATING.MPA_ID = FILM.mpa_id " +
+                        "LEFT OUTER JOIN FILM_DIRECTORS FD ON FILM.film_id = FD.film_id " +
+                        "LEFT OUTER JOIN DIRECTORS D ON FD.director_id = D.director_id " +
+                        "WHERE LOWER(film_name) LIKE ? " +
+                        "ORDER BY film_id DESC";
+                params.add("%" + query.toLowerCase() + "%");
+            } else if (by.get(0).equals("director")) {
+                sqlQuery = "SELECT FILM.film_id, film_name, FILM.description, release_date, duration, FILM.mpa_id, MPA_RATING.mpa_name, likes, D.director_name " +
+                        "FROM FILM " +
+                        "LEFT OUTER JOIN MPA_RATING ON MPA_RATING.MPA_ID = FILM.mpa_id " +
+                        "LEFT OUTER JOIN FILM_DIRECTORS FD ON FILM.film_id = FD.film_id " +
+                        "LEFT OUTER JOIN DIRECTORS D ON FD.director_id = D.director_id " +
+                        "WHERE LOWER(director_name) LIKE ? " +
+                        "ORDER BY film_id DESC";
+                params.add("%" + query.toLowerCase() + "%");
+            }
+        }
+
+        List<Film> allFilms = this.jdbcTemplate.query(
+                sqlQuery,
+                params.toArray(),
+                (resultSet, rowNum) -> {
+                    Film film = new Film();
+                    film.setId(resultSet.getInt("film_id"));
+                    film.setName(resultSet.getString("film_name"));
+                    film.setDescription(resultSet.getString("description"));
+                    film.setDuration(resultSet.getInt("duration"));
+                    film.setReleaseDate(resultSet.getDate("release_date").toLocalDate());
+
+                    Integer likes = resultSet.getInt("likes");
+                    if (likes != null) {
+                        film.setLikes(likes);
+                    }
+
+                    Integer mpa_id = resultSet.getInt("mpa_id");
+                    String mpa_name = resultSet.getString("mpa_name");
+                    Mpa mpa = new Mpa(mpa_id, mpa_name);
+                    film.setMpa(mpa);
+                    return film;
+                }
+        );
+
+        for (Film film : allFilms) {
+            if (film != null) {
+                takeGenreFromDb(film);
+                takeDirectorsFromDb(film);
+            }
+        }
+
+        return allFilms;
+
+    }
+
+    private Film takeGenreFromDb(Film film) {
+        String sqlQuery =
+                "select distinct fg.GENRE_ID," +
+                        " g.GENRE_NAME from FILM_GENRES fg " +
+                        "inner join GENRE g on fg.GENRE_ID = g.GENRE_ID " +
+                        "where fg.FILM_ID = ?";
+        List<Genres> foundGenres = jdbcTemplate.query(
+                sqlQuery,
+                new Object[]{film.getId()},
+                (resultSet, rowNum) -> {
+                    Genres genres = new Genres();
+                    genres.setId(Integer.parseInt(resultSet.getString("genre_id")));
+                    genres.setName(resultSet.getString("genre_name"));
+                    return genres;
+                });
+
+        film.setGenres(foundGenres);
+        return film;
+    }
+
+    private Film takeDirectorsFromDb(Film film) {
+        String sqlQuery =
+                "select fd.DIRECTOR_ID," +
+                        " d.DIRECTOR_NAME from FILM_DIRECTORS fd " +
+                        "inner join DIRECTORS d on fd.DIRECTOR_ID = d.DIRECTOR_ID " +
+                        "where fd.FILM_ID = ?";
+        List<Director> foundDirectors = jdbcTemplate.query
+                (
+                        sqlQuery,
+                        new Object[]{film.getId()},
+                        (resultSet, rowNum) -> {
+                            Director director = new Director();
+                            director.setId(Integer.parseInt(resultSet.getString("director_id")));
+                            director.setName(resultSet.getString("director_name"));
+                            return director;
+                        });
+
+        film.setDirectors(foundDirectors);
+        return film;
     }
 
     @Override

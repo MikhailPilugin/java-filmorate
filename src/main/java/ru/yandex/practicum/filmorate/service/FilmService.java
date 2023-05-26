@@ -10,4 +10,7 @@ public interface FilmService {
     public boolean delLike(Integer id, Integer userId);
 
     public List<Film> getPopularFilms(Integer count);
+
+    List<Film> searchFilms(String query, List<String> by);
+
 }
