@@ -95,7 +95,11 @@ public class DirectorDbStorageImpl implements DirectorStorage {
     @Override
     public boolean deleteDirectorById(int directorId) {
         String queryDelere = "DELETE FROM DIRECTORS WHERE DIRECTOR_ID = ?";
-        return jdbcTemplate.update(queryDelere, directorId) > 0;
+        boolean deleteDirector = jdbcTemplate.update(queryDelere, directorId) > 0;
+        if (!deleteDirector) {
+            throw new NotFoundException(HttpStatus.NOT_MODIFIED, "Director does not delete");
+        }
+        return true;
 
     }
 }

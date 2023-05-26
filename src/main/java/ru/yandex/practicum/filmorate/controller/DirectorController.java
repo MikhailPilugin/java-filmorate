@@ -2,9 +2,7 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.service.DirectorService;
 
@@ -29,10 +27,8 @@ public class DirectorController {
     @DeleteMapping("/{directorId}")
     public Director deliteDirectorById(@PathVariable int directorId) {
         Director director = directorService.getDirectorById(directorId);
-        Boolean directorById = directorService.deleteDirectorById(directorId);
-        if (directorById) {
-            log.debug("Director whit id = \"{}\" deleted", directorId);
-        } else throw new NotFoundException(HttpStatus.NOT_MODIFIED, "Director does not delete");
+        directorService.deleteDirectorById(directorId);
+        log.debug("Director whit id = \"{}\" deleted", directorId);
         return director;
     }
 
