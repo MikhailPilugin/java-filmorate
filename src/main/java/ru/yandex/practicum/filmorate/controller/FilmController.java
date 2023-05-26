@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @RestController
 @ResponseBody
+@Slf4j
 public class FilmController {
     private FilmDbStorage filmDbStorage;
     private FilmServiceImpl filmServiceImpl;
@@ -64,17 +66,24 @@ public class FilmController {
         return filmServiceImpl.getPopularFilms(count);
     }
 
+    @GetMapping("/films/director/{directorId}")
+    public List<Film> getFilmsWithDirector(@PathVariable int directorId, @RequestParam(defaultValue = "year") String sortBy) {
+        log.debug("Director whit id = \"{}\" ", directorId);
+        return filmServiceImpl.getPopularFilmsWithDirector(directorId, sortBy);
+    }
+
+    //dd
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleValidationException(final ValidationException e) {
         return new ErrorResponse("error", "Передан некорректный параметр");
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleRuntimeException(final RuntimeException e) {
-        return new ErrorResponse("error", e.getMessage());
-    }
+//    @ExceptionHandler
+//    @ResponseStatus(HttpStatus.BAD_REQUEST)
+//    public ErrorResponse handleRuntimeException(final RuntimeException e) {
+//        return new ErrorResponse("error", e.getMessage());
+//    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
