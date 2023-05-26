@@ -137,16 +137,15 @@ public class FilmDbStorage implements FilmStorage {
                         " d.DIRECTOR_NAME from FILM_DIRECTORS fd " +
                         "inner join DIRECTORS d on fd.DIRECTOR_ID = d.DIRECTOR_ID " +
                         "where fd.FILM_ID = ?";
-        List<Director> foundDirectors = jdbcTemplate.query
-                (
-                        sqlQuery,
-                        new Object[]{film.getId()},
-                        (resultSet, rowNum) -> {
-                            Director director = new Director();
-                            director.setId(Integer.parseInt(resultSet.getString("director_id")));
-                            director.setName(resultSet.getString("director_name"));
-                            return director;
-                        });
+        List<Director> foundDirectors = jdbcTemplate.query(
+                sqlQuery,
+                new Object[]{film.getId()},
+                (resultSet, rowNum) -> {
+                    Director director = new Director();
+                    director.setId(Integer.parseInt(resultSet.getString("director_id")));
+                    director.setName(resultSet.getString("director_name"));
+                    return director;
+                });
 
         film.setDirectors(foundDirectors);
         return film;
