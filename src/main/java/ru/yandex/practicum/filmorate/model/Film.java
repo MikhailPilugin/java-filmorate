@@ -33,9 +33,12 @@ public class Film {
     private Mpa mpa;
     private List<Genres> genres;
 
+    List<Director> directors;
+
     public Film() {
         this.likes = new HashSet<>();
         this.genres = new ArrayList<>();
+        this.directors = new ArrayList<>();
     }
 
     public int setLikes(Integer id) {
@@ -49,14 +52,5 @@ public class Film {
         return status;
     }
 
-    public int removeLikes(Integer id) {
-        int status = 0;
 
-        if (id != null) {
-            likes.remove(id);
-            status = 1;
-            rate--;
-        }
-        return status;
-    }
 }
