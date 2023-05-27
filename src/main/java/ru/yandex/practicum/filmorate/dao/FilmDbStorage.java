@@ -86,9 +86,9 @@ public class FilmDbStorage implements FilmStorage {
                         film.setLikes(likes);
                     }
 
-                    Integer mpa_id = resultSet.getInt("mpa_id");
-                    String mpa_name = resultSet.getString("mpa_name");
-                    Mpa mpa = new Mpa(mpa_id, mpa_name);
+                    Integer mpaId = resultSet.getInt("mpa_id");
+                    String mpaName = resultSet.getString("mpa_name");
+                    Mpa mpa = new Mpa(mpaId, mpaName);
                     film.setMpa(mpa);
                     return film;
                 }
