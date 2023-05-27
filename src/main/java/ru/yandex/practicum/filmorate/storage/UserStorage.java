@@ -15,4 +15,6 @@ public interface UserStorage {
     User updateUser(User user) throws ValidationException;
 
     User deleteUser(User user) throws ValidationException;
+
+    User deleteUserById(Integer id) throws IllegalArgumentException;
 }

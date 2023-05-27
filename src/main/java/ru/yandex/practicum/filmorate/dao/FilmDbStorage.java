@@ -547,4 +547,24 @@ public class FilmDbStorage implements FilmStorage {
 
         return film;
     }
+
+
+    @Override
+    public boolean deleteFilmById(Integer id) throws IllegalArgumentException {
+        boolean isFilmDelete = false;
+
+        String sqlQueryOne = "delete from film where film_id = ?";
+        int statusOne = jdbcTemplate.update(sqlQueryOne, id);
+
+        String sqlQueryTwo = "delete from film_genres where film_id = ?";
+        int statusTwo = jdbcTemplate.update(sqlQueryTwo, id);
+
+        if (statusOne == 1 && statusTwo == 1) {
+            isFilmDelete = true;
+        } else {
+            throw new IllegalArgumentException("film id not found");
+        }
+
+        return isFilmDelete;
+    }
 }
