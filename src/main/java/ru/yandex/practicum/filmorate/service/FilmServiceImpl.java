@@ -153,4 +153,9 @@ public class FilmServiceImpl implements FilmService {
         return filmDbStorage.getFilmsByDirectorId(directorId, sortBy);
     }
 
+    @Override
+    public List<Film> searchFilms(String query, List<String> by) {
+        return filmDbStorage.searchFilms(query.toLowerCase(),by);
+    }
+
 }

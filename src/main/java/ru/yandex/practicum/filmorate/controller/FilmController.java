@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @RestController
 @ResponseBody
+@Slf4j
 public class FilmController {
     private FilmDbStorage filmDbStorage;
     private FilmServiceImpl filmServiceImpl;
@@ -63,6 +65,18 @@ public class FilmController {
     public List<Film> getPopularFilms(@RequestParam(required = false) Integer count) {
         return filmServiceImpl.getPopularFilms(count);
     }
+
+    @GetMapping("/films/director/{directorId}")
+    public List<Film> getFilmsWithDirector(@PathVariable int directorId, @RequestParam(defaultValue = "year") String sortBy) {
+        log.debug("Director whit id = \"{}\" ", directorId);
+        return filmServiceImpl.getPopularFilmsWithDirector(directorId, sortBy);
+    }
+
+    @GetMapping("/films/search")
+    public List<Film> searchFilms(@RequestParam String query, @RequestParam List<String> by ) {
+        return filmServiceImpl.searchFilms(query,by);
+    }
+
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
