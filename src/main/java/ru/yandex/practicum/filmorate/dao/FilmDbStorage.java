@@ -1,12 +1,14 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -27,6 +29,81 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+
+    @Override
+    public List<Film> searchFilms(String query, List<String> by) {
+
+        String sqlQuery = "";
+        List<Object> params = new ArrayList<>();
+
+        if (by.size() > 2) {
+            throw new NotFoundException(HttpStatus.BAD_REQUEST, "wrong parameters");
+        } else if (by.size() == 2 && by.contains("title") && by.contains("director")) {
+            sqlQuery = "SELECT FILM.film_id, film_name, FILM.description, release_date, duration, FILM.mpa_id, MPA_RATING.mpa_name, likes, D.director_name " +
+                    "FROM FILM " +
+                    "LEFT OUTER JOIN MPA_RATING ON MPA_RATING.MPA_ID = FILM.mpa_id " +
+                    "LEFT OUTER JOIN FILM_DIRECTORS FD ON FILM.film_id = FD.film_id " +
+                    "LEFT OUTER JOIN DIRECTORS D ON FD.director_id = D.director_id " +
+                    "WHERE LOWER(director_name) LIKE ? OR LOWER(film_name) LIKE ? " +
+                    "ORDER BY film_id DESC";
+            params.add("%" + query.toLowerCase() + "%");
+            params.add("%" + query.toLowerCase() + "%");
+        } else if (by.size() == 1) {
+            if (by.get(0).equals("title")) {
+                sqlQuery = "SELECT FILM.film_id, film_name, FILM.description, release_date, duration, FILM.mpa_id, MPA_RATING.mpa_name, likes, D.director_name " +
+                        "FROM FILM " +
+                        "LEFT OUTER JOIN MPA_RATING ON MPA_RATING.MPA_ID = FILM.mpa_id " +
+                        "LEFT OUTER JOIN FILM_DIRECTORS FD ON FILM.film_id = FD.film_id " +
+                        "LEFT OUTER JOIN DIRECTORS D ON FD.director_id = D.director_id " +
+                        "WHERE LOWER(film_name) LIKE ? " +
+                        "ORDER BY film_id DESC";
+                params.add("%" + query.toLowerCase() + "%");
+            } else if (by.get(0).equals("director")) {
+                sqlQuery = "SELECT FILM.film_id, film_name, FILM.description, release_date, duration, FILM.mpa_id, MPA_RATING.mpa_name, likes, D.director_name " +
+                        "FROM FILM " +
+                        "LEFT OUTER JOIN MPA_RATING ON MPA_RATING.MPA_ID = FILM.mpa_id " +
+                        "LEFT OUTER JOIN FILM_DIRECTORS FD ON FILM.film_id = FD.film_id " +
+                        "LEFT OUTER JOIN DIRECTORS D ON FD.director_id = D.director_id " +
+                        "WHERE LOWER(director_name) LIKE ? " +
+                        "ORDER BY film_id DESC";
+                params.add("%" + query.toLowerCase() + "%");
+            }
+        }
+
+        List<Film> allFilms = this.jdbcTemplate.query(
+                sqlQuery,
+                params.toArray(),
+                (resultSet, rowNum) -> {
+                    Film film = new Film();
+                    film.setId(resultSet.getInt("film_id"));
+                    film.setName(resultSet.getString("film_name"));
+                    film.setDescription(resultSet.getString("description"));
+                    film.setDuration(resultSet.getInt("duration"));
+                    film.setReleaseDate(resultSet.getDate("release_date").toLocalDate());
+
+                    Integer likes = resultSet.getInt("likes");
+                    if (likes != null) {
+                        film.setLikes(likes);
+                    }
+
+                    Integer mpaId = resultSet.getInt("mpa_id");
+                    String mpaName = resultSet.getString("mpa_name");
+                    Mpa mpa = new Mpa(mpaId, mpaName);
+                    film.setMpa(mpa);
+                    return film;
+                }
+        );
+
+        for (Film film : allFilms) {
+            if (film != null) {
+                takeGenreFromDb(film);
+                takeDirectorsFromDb(film);
+            }
+        }
+
+        return allFilms;
+
+    }
 
     @Override
     public List<Film> getFilmsByDirectorId(int directorId, String sortBy) {
@@ -470,6 +547,4 @@ public class FilmDbStorage implements FilmStorage {
 
         return film;
     }
-
-
 }

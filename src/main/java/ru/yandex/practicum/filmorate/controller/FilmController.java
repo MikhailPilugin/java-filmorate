@@ -72,18 +72,17 @@ public class FilmController {
         return filmServiceImpl.getPopularFilmsWithDirector(directorId, sortBy);
     }
 
-    //dd
+    @GetMapping("/films/search")
+    public List<Film> searchFilms(@RequestParam String query, @RequestParam List<String> by) {
+        return filmServiceImpl.searchFilms(query,by);
+    }
+
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleValidationException(final ValidationException e) {
         return new ErrorResponse("error", "Передан некорректный параметр");
     }
-
-//    @ExceptionHandler
-//    @ResponseStatus(HttpStatus.BAD_REQUEST)
-//    public ErrorResponse handleRuntimeException(final RuntimeException e) {
-//        return new ErrorResponse("error", e.getMessage());
-//    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

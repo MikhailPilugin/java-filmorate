@@ -12,4 +12,7 @@ public interface FilmService {
     List<Film> getPopularFilms(Integer count);
 
     List<Film> getPopularFilmsWithDirector(int directorId, String sortBy);
- }
+
+    List<Film> searchFilms(String query, List<String> by);
+
+}
