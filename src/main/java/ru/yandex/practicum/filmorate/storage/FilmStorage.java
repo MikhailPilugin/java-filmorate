@@ -17,7 +17,5 @@ public interface FilmStorage {
 
     Film deleteFilm(Film film) throws ValidationException;
 
-    List<Film> searchFilms(String query, List<String> by);
-
-
+    List<Film> getFilmsByDirectorId(int directorId, String sortBy);
 }

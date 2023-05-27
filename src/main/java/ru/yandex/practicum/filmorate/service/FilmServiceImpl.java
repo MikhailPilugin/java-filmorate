@@ -1,29 +1,25 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
-    private final Logger log = LoggerFactory.getLogger(FilmServiceImpl.class);
+
     private final FilmDbStorage filmDbStorage;
-
+    private final DirectorStorage directorStorage;
     private final JdbcTemplate jdbcTemplate;
-
-    public FilmServiceImpl(FilmDbStorage filmDbStorage, JdbcTemplate jdbcTemplate) {
-        this.filmDbStorage = filmDbStorage;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public boolean addLike(Integer id, Integer userId) {
@@ -152,8 +148,9 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public List<Film> searchFilms(String query, List<String> by) {
-
-        return filmDbStorage.searchFilms(query, by);
+    public List<Film> getPopularFilmsWithDirector(int directorId, String sortBy) {
+        directorStorage.getDirectorFromRepoById(directorId);
+        return filmDbStorage.getFilmsByDirectorId(directorId, sortBy);
     }
+
 }

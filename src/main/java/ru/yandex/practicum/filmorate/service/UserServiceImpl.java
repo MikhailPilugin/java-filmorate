@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,16 +13,12 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserDbStorage userDbStorage;
 
     private final JdbcTemplate jdbcTemplate;
-
-    public UserServiceImpl(UserDbStorage userDbStorage, JdbcTemplate jdbcTemplate) {
-        this.userDbStorage = userDbStorage;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public boolean addFriend(int id, int friendId) {
