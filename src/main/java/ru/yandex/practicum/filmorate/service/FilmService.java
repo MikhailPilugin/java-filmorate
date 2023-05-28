@@ -9,7 +9,7 @@ public interface FilmService {
 
     boolean delLike(Integer id, Integer userId);
 
-    List<Film> getPopularFilms(Integer count);
+    List<Film> getPopularFilms(Integer count, Integer genreId, Integer year);
 
     List<Film> getPopularFilmsWithDirector(int directorId, String sortBy);
 

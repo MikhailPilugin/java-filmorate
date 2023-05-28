@@ -74,79 +74,23 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public List<Film> getPopularFilms(Integer count) {
-        SqlRowSet mpaRows = jdbcTemplate.queryForRowSet("select * from mpa_rating");
-
-        Film film = new Film();
-        List<Film> allRatedFilms = new ArrayList<>();
-        List<Film> sortedRatedFilms = new ArrayList<>();
-
-        if (count == null) {
-            SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from film order by likes desc limit 10");
-
-            if (filmRows.next()) {
-                do {
-                    int mpaId = 0;
-                    String mpaName = null;
-
-                    do {
-                        if (mpaRows.next()) {
-                            mpaId = mpaRows.getInt("mpa_id");
-                            mpaName = mpaRows.getString("mpa_name");
-                        }
-                    } while (mpaId != filmRows.getInt("mpa_id"));
-
-                    Mpa mpa = new Mpa();
-                    mpa.setId(mpaId);
-                    mpa.setName(mpaName);
-
-                    film.setId(filmRows.getInt("film_id"));
-                    film.setName(filmRows.getString("film_name"));
-                    film.setDescription(filmRows.getString("description"));
-                    film.setReleaseDate(LocalDate.parse(filmRows.getString("release_date")));
-                    film.setDuration(filmRows.getInt("duration"));
-                    film.setMpa(mpa);
-                    film.setRate(filmRows.getInt("likes"));
-
-                    allRatedFilms.add(film);
-
-                } while (filmRows.next());
-            }
-
-        } else {
-            SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from film order by likes limit " + count);
-
-            if (filmRows.next()) {
-                do {
-                    int mpaId = 0;
-                    String mpaName = null;
-
-                    do {
-                        if (mpaRows.next()) {
-                            mpaId = mpaRows.getInt("mpa_id");
-                            mpaName = mpaRows.getString("mpa_name");
-                        }
-                    } while (mpaId != filmRows.getInt("mpa_id"));
-
-                    Mpa mpa = new Mpa();
-                    mpa.setId(mpaId);
-                    mpa.setName(mpaName);
-
-                    film.setId(filmRows.getInt("film_id"));
-                    film.setName(filmRows.getString("film_name"));
-                    film.setDescription(filmRows.getString("description"));
-                    film.setReleaseDate(LocalDate.parse(filmRows.getString("release_date")));
-                    film.setDuration(filmRows.getInt("duration"));
-                    film.setMpa(mpa);
-                    film.setRate(filmRows.getInt("likes"));
-
-                    allRatedFilms.add(film);
-
-                } while (filmRows.next());
-            }
-        }
-        return allRatedFilms;
-    }
+    public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
+        String sql = "SELECT f.id, " +
+                "f.name, " +
+                "f.description, " +
+                "f.release_date, " +
+                "f.duration," +
+                "m.id as mpa_id, " +
+                "m.name as mpa_name " +
+                "FROM films f " +
+                "INNER JOIN mpa m ON f.mpa_id=m.id " +
+                "LEFT JOIN FILMS_LIKES fl on f.id = fl.film_id " +
+                "GROUP BY f.id " +
+                "ORDER BY COUNT(fl.film_id) DESC " +
+                "LIMIT ?";
+        return jdbcTemplate.query(sql, new Object[]{count},
+                new FilmMaker(jdbcTemplate));
+       }
 
     @Override
     public List<Film> getPopularFilmsWithDirector(int directorId, String sortBy) {
