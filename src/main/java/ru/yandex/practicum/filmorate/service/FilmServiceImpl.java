@@ -12,6 +12,7 @@ import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -21,29 +22,39 @@ public class FilmServiceImpl implements FilmService {
     private final DirectorStorage directorStorage;
     private final JdbcTemplate jdbcTemplate;
 
+//    @Override
+//    public boolean addLike(Integer id, Integer userId) {
+//        String sqlQueryOne = "insert into film_likes (film_id, user_id) values (?, ?)";
+//        boolean likeIsAdded;
+//        int likes = 0;
+//
+//        jdbcTemplate.update(sqlQueryOne,
+//                id,
+//                userId);
+//
+//        SqlRowSet likesRows = jdbcTemplate.queryForRowSet("select likes from film where film_id = ?", id);
+//
+//        if (likesRows.next()) {
+//            likes = likesRows.getInt("likes");
+//        }
+//
+//
+//        String sqlQueryTwo = "update film set likes = ? where film_id = ?";
+//        likeIsAdded = jdbcTemplate.update(sqlQueryTwo,
+//                likes + 1,
+//                id) > 0;
+//
+//        return likeIsAdded;
+//    }
+
     @Override
-    public boolean addLike(Integer id, Integer userId) {
-        String sqlQueryOne = "insert into film_likes (film_id, user_id) values (?, ?)";
-        boolean likeIsAdded;
-        int likes = 0;
+    public Film addLike(int filmId, int userId) {
+        Film filmToLike = filmDbStorage.getFilmById(filmId);
+        Set<Integer> likes = filmToLike.getLikes();
+        likes.add(userId);
+        filmDbStorage.addFilmLikeToRepo(filmToLike, userId);
+        return filmToLike;
 
-        jdbcTemplate.update(sqlQueryOne,
-                id,
-                userId);
-
-        SqlRowSet likesRows = jdbcTemplate.queryForRowSet("select likes from film where film_id = ?", id);
-
-        if (likesRows.next()) {
-            likes = likesRows.getInt("likes");
-        }
-
-
-        String sqlQueryTwo = "update film set likes = ? where film_id = ?";
-        likeIsAdded = jdbcTemplate.update(sqlQueryTwo,
-                likes + 1,
-                id) > 0;
-
-        return likeIsAdded;
     }
 
     @Override
@@ -155,7 +166,12 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> searchFilms(String query, List<String> by) {
-        return filmDbStorage.searchFilms(query.toLowerCase(),by);
+        return filmDbStorage.searchFilms(query.toLowerCase(), by);
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return filmDbStorage.getCommonFilms(userId, friendId);
     }
 
 }

@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -50,9 +51,15 @@ public class FilmController {
     public Film deleteFilm(@RequestBody @Valid Film film) throws ValidationException {
         return filmDbStorage.deleteFilm(film);
     }
-
+//films/common?userId=1&friendId=2
+@GetMapping("/films/common")
+public ResponseEntity<List<Film>> getCommonFilms(@RequestParam("userId") Integer userId, @RequestParam("friendId") Integer friendId) {
+    // Здесь происходит обработка запроса по соответствующему методу сервиса
+    List<Film> commonFilms = filmServiceImpl.getCommonFilms(userId, friendId);
+    return ResponseEntity.ok(commonFilms);
+}
     @PutMapping("/films/{id}/like/{userId}")
-    public boolean addLike(@PathVariable Integer id, @PathVariable Integer userId) {
+    public Film addLike(@PathVariable Integer id, @PathVariable Integer userId) {
         return filmServiceImpl.addLike(id, userId);
     }
 

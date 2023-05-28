@@ -5,7 +5,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import java.util.List;
 
 public interface FilmService {
-    boolean addLike(Integer id, Integer userId);
+
+    Film addLike(int filmId, int userId);
 
     boolean delLike(Integer id, Integer userId);
 
@@ -15,4 +16,5 @@ public interface FilmService {
 
     List<Film> searchFilms(String query, List<String> by);
 
+    List<Film> getCommonFilms(Integer userId, Integer friendId);
 }

@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -8,6 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exceptions.DubleException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -29,6 +31,95 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+
+    @SneakyThrows
+    @Override
+    public Film addFilmLikeToRepo(Film filmToLike, int userId) {
+
+        String checkQuery = "SELECT COUNT(*) FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?";
+        int count = jdbcTemplate.queryForObject(checkQuery, new Object[]{filmToLike.getId(), userId}, Integer.class);
+
+        if (count > 0) {
+            throw new DubleException("Like to film '" +
+                    filmToLike.getName() +
+                    "' from user id='" +
+                    userId +
+                    "' already exists");
+        }
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        String sqlQuery = "INSERT INTO FILM_LIKES (FILM_ID, USER_ID)" +
+                "SELECT ?, ?" +
+                "WHERE NOT EXISTS (" +
+                "    SELECT 1" +
+                "    FROM FILM_LIKES" +
+                "    WHERE FILM_ID = ? AND USER_ID = ?" +
+                ")";
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(sqlQuery);
+            stmt.setInt(1, filmToLike.getId());
+            stmt.setInt(2, userId);
+            stmt.setInt(3, filmToLike.getId());
+            stmt.setInt(4, userId);
+            return stmt;
+        }, keyHolder);
+
+
+        return filmToLike;
+    }
+
+    @Override
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        List <Object> objectList = new ArrayList<>();
+        objectList.add(userId);
+        objectList.add(friendId);
+        String sqlQuery = "SELECT FILM.film_id, film_name, FILM.description, release_date, duration, FILM.mpa_id, MPA_RATING.mpa_name, likes " +
+                "                FROM FILM " +
+                "JOIN MPA_RATING ON MPA_RATING.MPA_ID = FILM.mpa_id " +
+                "              WHERE film_id IN ( " +
+                "SELECT film_id " +
+                "FROM film_likes " +
+                " WHERE film_id  IN  (SELECT film_id " +
+                "              FROM film_likes " +
+                "             WHERE user_id = ?) " +
+                "AND film_id  IN (SELECT film_id " +
+                "           FROM film_likes " +
+                "      WHERE user_id = ? ) " +
+                ") " +
+                "         ORDER BY likes DESC ";
+
+
+        List<Film> allFilms = this.jdbcTemplate.query(
+                sqlQuery ,
+                objectList.toArray(),
+                (resultSet, rowNum) -> {
+                    Film film = new Film();
+                    film.setId(Integer.parseInt(resultSet.getString("film_id")));
+                    film.setName(resultSet.getString("film_name"));
+                    film.setDescription(resultSet.getString("description"));
+                    film.setDuration(Integer.parseInt(resultSet.getString("duration")));
+                    film.setReleaseDate(LocalDate.parse(resultSet.getString("release_date")));
+
+                    String likes = resultSet.getString("likes");
+                    if (likes != null) {
+                        film.setLikes(Integer.parseInt(resultSet.getString("likes")));
+                    }
+                    Integer mpaId = Integer.parseInt(resultSet.getString("mpa_id"));
+
+                    String mpaName = resultSet.getString("mpa_name");
+                    Mpa mpa  = new Mpa(mpaId, mpaName);
+                    film.setMpa(mpa);
+                    return film;
+                });
+        for (Film film : allFilms) {
+            if (film != null) {
+                takeGenreFromDb(film);
+                takeDirectorsFromDb(film);
+            }
+        }
+        return allFilms;
+    }
+
 
     @Override
     public List<Film> searchFilms(String query, List<String> by) {
@@ -104,6 +195,7 @@ public class FilmDbStorage implements FilmStorage {
         return allFilms;
 
     }
+
 
     @Override
     public List<Film> getFilmsByDirectorId(int directorId, String sortBy) {
