@@ -74,9 +74,14 @@ public class FilmController {
 
     @GetMapping("/films/search")
     public List<Film> searchFilms(@RequestParam String query, @RequestParam List<String> by) {
-        return filmServiceImpl.searchFilms(query,by);
+        return filmServiceImpl.searchFilms(query, by);
     }
 
+
+    @GetMapping("/users/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable Integer id) {
+        return filmServiceImpl.getRecommendations(id);
+    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -142,7 +142,7 @@ public class FilmDbStorage implements FilmStorage {
                     Integer mpaId = Integer.parseInt(resultSet.getString("mpa_id"));
 
                     String mpaName = resultSet.getString("mpa_name");
-                    Mpa mpa  = new Mpa(mpaId, mpaName);
+                    Mpa mpa = new Mpa(mpaId, mpaName);
                     film.setMpa(mpa);
                     return film;
                 });

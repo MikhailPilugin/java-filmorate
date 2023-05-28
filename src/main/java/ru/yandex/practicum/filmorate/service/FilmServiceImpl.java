@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
+import ru.yandex.practicum.filmorate.dao.FilmMaker;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
@@ -155,7 +156,50 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> searchFilms(String query, List<String> by) {
-        return filmDbStorage.searchFilms(query.toLowerCase(),by);
+        return filmDbStorage.searchFilms(query.toLowerCase(), by);
     }
 
+
+    @Override
+    public List<Film> getRecommendations(Integer userId) {
+        List<Film> filmsOfSimilarUser = new ArrayList<>();
+
+        String sql = "SELECT DISTINCT USER_ID,  COUNT(FILM_ID) FROM  FILM_LIKES " +
+                "    WHERE FILM_ID IN (SELECT FILM_ID FROM FILM_LIKES " +
+                "    WHERE USER_ID = ?) AND USER_ID <> ? " +
+                "GROUP BY USER_ID " +
+                "ORDER BY COUNT(FILM_ID) DESC " +
+                "LIMIT 1";
+
+        Integer mostSimilarUser = jdbcTemplate.query(sql,
+                        (rs, rowNum) -> rs.getInt("USER_ID"), userId, userId)
+                .stream()
+                .findAny().orElse(null);
+
+        if (mostSimilarUser != null) {
+            sql = "SELECT F.FILM_ID, " +
+                    "F.FILM_NAME, " +
+                    "F.DESCRIPTION, " +
+                    "F.RELEASE_DATE, " +
+                    "F.DURATION, " +
+                    "M.MPA_ID, " +
+                    "M.MPA_NAME, " +
+                    "F.LIKES " +
+                    "FROM FILM F " +
+                    "INNER JOIN MPA_RATING M ON F.MPA_ID=M.MPA_ID " +
+                    "INNER JOIN " +
+                    "(SELECT * FROM FILM_LIKES " +
+                    "WHERE USER_ID=? AND FILM_ID NOT IN " +
+                    "(SELECT FILM_ID FROM FILM_LIKES " +
+                    "WHERE USER_ID = ?)) " +
+                    "FL ON F.FILM_ID = FL.FILM_ID " +
+                    "GROUP BY F.FILM_ID ";
+
+            filmsOfSimilarUser = jdbcTemplate.query(sql, new Object[]{mostSimilarUser, userId},
+                    new FilmMaker(jdbcTemplate));
+
+        }
+        return filmsOfSimilarUser;
+
+    }
 }

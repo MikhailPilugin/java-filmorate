@@ -41,6 +41,34 @@ public class Film {
         this.directors = new ArrayList<>();
     }
 
+
+    public Film(int id, String name, String description, LocalDate releaseDate,
+                long duration, Set<Integer> likes, int rate, Mpa mpa, List<Genres> genres,
+                List<Director> directors) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        if (likes == null) {
+            this.likes = new HashSet<>();
+        } else {
+            this.likes = likes;
+        }
+        this.rate = rate;
+        this.mpa = mpa;
+        if (genres == null) {
+            this.genres = new ArrayList<>();
+        } else {
+            this.genres = genres;
+        }
+        if (genres == null) {
+            this.directors = new ArrayList<>();
+        } else {
+            this.directors = directors;
+        }
+    }
+
     public int setLikes(Integer id) {
         int status = 0;
 

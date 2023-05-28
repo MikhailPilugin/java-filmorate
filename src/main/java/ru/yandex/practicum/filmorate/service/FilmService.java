@@ -15,4 +15,5 @@ public interface FilmService {
 
     List<Film> searchFilms(String query, List<String> by);
 
+    List<Film> getRecommendations(Integer userId);
 }
