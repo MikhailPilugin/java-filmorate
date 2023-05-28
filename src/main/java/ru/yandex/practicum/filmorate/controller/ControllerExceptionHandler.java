@@ -27,9 +27,4 @@ public class ControllerExceptionHandler {
         return Map.of("duble", erroMessage);
     }
 
-    @ExceptionHandler({RuntimeException.class})
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleRuntimeException(final RuntimeException e) {
-        return new ErrorResponse("RuntimeException", e.getMessage());
-    }
 }
