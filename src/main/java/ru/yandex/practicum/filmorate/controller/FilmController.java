@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
@@ -56,8 +57,15 @@ public class FilmController {
         return filmDbStorage.deleteFilm(film);
     }
 
+    @GetMapping("/films/common")
+    public ResponseEntity<List<Film>> getCommonFilms(@RequestParam("userId") Integer userId, @RequestParam("friendId") Integer friendId) {
+        // Здесь происходит обработка запроса по соответствующему методу сервиса
+        List<Film> commonFilms = filmServiceImpl.getCommonFilms(userId, friendId);
+        return ResponseEntity.ok(commonFilms);
+    }
+
     @PutMapping("/films/{id}/like/{userId}")
-    public boolean addLike(@PathVariable Integer id, @PathVariable Integer userId) {
+    public Film addLike(@PathVariable Integer id, @PathVariable Integer userId) {
         return filmServiceImpl.addLike(id, userId);
     }
 
@@ -79,9 +87,14 @@ public class FilmController {
 
     @GetMapping("/films/search")
     public List<Film> searchFilms(@RequestParam String query, @RequestParam List<String> by) {
-        return filmServiceImpl.searchFilms(query,by);
+        return filmServiceImpl.searchFilms(query, by);
     }
 
+
+    @GetMapping("/users/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable Integer id) {
+        return filmServiceImpl.getRecommendations(id);
+    }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
