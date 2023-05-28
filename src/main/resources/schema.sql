@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS users, friendship, genre, mpa_rating, film, film_genres, film_likes, directors,film_directors CASCADE;
+DROP TABLE IF EXISTS users, friendship, genre, mpa_rating, film, film_genres, film_likes, directors, film_directors CASCADE;
 
 CREATE TABLE IF NOT EXISTS users
 (
@@ -42,14 +42,14 @@ CREATE TABLE IF NOT EXISTS film
 
 CREATE TABLE IF NOT EXISTS film_genres
 (
-    film_id  INTEGER REFERENCES film (film_id),
-    genre_id INTEGER REFERENCES genre (genre_id)
+    film_id  INTEGER REFERENCES film (film_id) ON DELETE CASCADE,
+    genre_id INTEGER REFERENCES genre (genre_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS film_likes
 (
-    user_id INTEGER REFERENCES users (user_id),
-    film_id INTEGER REFERENCES film (film_id)
+    user_id INTEGER REFERENCES users (user_id) ON DELETE CASCADE,
+    film_id INTEGER REFERENCES film (film_id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS directors

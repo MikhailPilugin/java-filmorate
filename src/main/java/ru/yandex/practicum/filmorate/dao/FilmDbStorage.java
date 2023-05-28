@@ -193,9 +193,7 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         return allFilms;
-
     }
-
 
     @Override
     public List<Film> getFilmsByDirectorId(int directorId, String sortBy) {
@@ -429,11 +427,11 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) throws ValidationException {
         List<Genres> genres = film.getGenres();
-        int genreId = 0;
+        List<Integer> genreId = new ArrayList<>();
 
         if (genres.size() > 0) {
             for (Genres genre : genres) {
-                genreId = genre.getId();
+                genreId.add(genre.getId());
             }
 
             film.setGenres(genres);
@@ -464,11 +462,13 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(keyHolder.getKey().intValue());
 
         if (genres.size() > 0) {
-            String sqlQueryGenres = "insert into film_genres (film_id, genre_id) " +
-                    "values (?, ?)";
-            jdbcTemplate.update(sqlQueryGenres,
-                    keyHolder.getKey().intValue(),
-                    genreId);
+            for (int i = 0; i < genreId.size(); i++) {
+                String sqlQueryGenres = "insert into film_genres (film_id, genre_id) " +
+                        "values (?, ?)";
+                jdbcTemplate.update(sqlQueryGenres,
+                        keyHolder.getKey().intValue(),
+                        genreId.get(i));
+            }
         }
 
         // добавляем функционал добавления нового директора
@@ -638,5 +638,25 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlQuery, film.getId());
 
         return film;
+    }
+
+
+    @Override
+    public boolean deleteFilmById(Integer id) throws IllegalArgumentException {
+        boolean isFilmDelete = false;
+
+        String sqlQueryOne = "delete from film where film_id = ?";
+        int statusOne = jdbcTemplate.update(sqlQueryOne, id);
+
+        String sqlQueryTwo = "delete from film_genres where film_id = ?";
+        jdbcTemplate.update(sqlQueryTwo, id);
+
+        if (statusOne == 1) {
+            isFilmDelete = true;
+        } else {
+            throw new IllegalArgumentException("film id not found");
+        }
+
+        return isFilmDelete;
     }
 }

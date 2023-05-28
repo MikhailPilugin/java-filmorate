@@ -87,7 +87,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("");
         }
 
-        // выполняем запрос к базе данных.
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from friendship where user_id = ?", id);
 
         if (userRows.next()) {
@@ -134,7 +133,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("");
         }
 
-        // выполняем запрос к базе данных.
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM friendship WHERE friend_id IN (" +
                 " SELECT friend_id FROM friendship WHERE user_id = ? INTERSECT " +
                 "SELECT friend_id FROM friendship WHERE user_id = ? )", id, otherId);

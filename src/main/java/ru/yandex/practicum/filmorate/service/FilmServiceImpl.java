@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.FilmMaker;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
@@ -22,31 +23,6 @@ public class FilmServiceImpl implements FilmService {
     private final FilmDbStorage filmDbStorage;
     private final DirectorStorage directorStorage;
     private final JdbcTemplate jdbcTemplate;
-
-//    @Override
-//    public boolean addLike(Integer id, Integer userId) {
-//        String sqlQueryOne = "insert into film_likes (film_id, user_id) values (?, ?)";
-//        boolean likeIsAdded;
-//        int likes = 0;
-//
-//        jdbcTemplate.update(sqlQueryOne,
-//                id,
-//                userId);
-//
-//        SqlRowSet likesRows = jdbcTemplate.queryForRowSet("select likes from film where film_id = ?", id);
-//
-//        if (likesRows.next()) {
-//            likes = likesRows.getInt("likes");
-//        }
-//
-//
-//        String sqlQueryTwo = "update film set likes = ? where film_id = ?";
-//        likeIsAdded = jdbcTemplate.update(sqlQueryTwo,
-//                likes + 1,
-//                id) > 0;
-//
-//        return likeIsAdded;
-//    }
 
     @Override
     public Film addLike(int filmId, int userId) {
@@ -90,9 +66,9 @@ public class FilmServiceImpl implements FilmService {
 
         Film film = new Film();
         List<Film> allRatedFilms = new ArrayList<>();
-        List<Film> sortedRatedFilms = new ArrayList<>();
 
         if (count == null) {
+            List<Genres> genresList = new ArrayList<>();
             SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from film order by likes desc limit 10");
 
             if (filmRows.next()) {
@@ -111,13 +87,30 @@ public class FilmServiceImpl implements FilmService {
                     mpa.setId(mpaId);
                     mpa.setName(mpaName);
 
-                    film.setId(filmRows.getInt("film_id"));
+                    int filmId = filmRows.getInt("film_id");
+
+                    SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select distinct f.film_id, fg.genre_id, g.genre_name " +
+                            "from film_genres fg join genre g on fg.genre_id = g.genre_id " +
+                            "join film f on fg.film_id = f.film_id where f.film_id = ?", filmId);
+
+                    if (genreRows.next()) {
+                        do {
+                            Genres genres = new Genres();
+                            genres.setId(genreRows.getInt("genre_id"));
+                            genres.setName(genreRows.getString("genre_name"));
+
+                            genresList.add(genres);
+                        } while (genreRows.next());
+                    }
+
+                    film.setId(filmId);
                     film.setName(filmRows.getString("film_name"));
                     film.setDescription(filmRows.getString("description"));
                     film.setReleaseDate(LocalDate.parse(filmRows.getString("release_date")));
                     film.setDuration(filmRows.getInt("duration"));
                     film.setMpa(mpa);
                     film.setRate(filmRows.getInt("likes"));
+                    film.setGenres(genresList);
 
                     allRatedFilms.add(film);
 
@@ -125,6 +118,7 @@ public class FilmServiceImpl implements FilmService {
             }
 
         } else {
+            List<Genres> genresList = new ArrayList<>();
             SqlRowSet filmRows = jdbcTemplate.queryForRowSet("select * from film order by likes limit " + count);
 
             if (filmRows.next()) {
@@ -143,13 +137,30 @@ public class FilmServiceImpl implements FilmService {
                     mpa.setId(mpaId);
                     mpa.setName(mpaName);
 
-                    film.setId(filmRows.getInt("film_id"));
+                    int filmId = filmRows.getInt("film_id");
+
+                    SqlRowSet genreRows = jdbcTemplate.queryForRowSet("select distinct f.film_id, fg.genre_id, g.genre_name " +
+                            "from film_genres fg join genre g on fg.genre_id = g.genre_id " +
+                            "join film f on fg.film_id = f.film_id where f.film_id = ?", filmId);
+
+                    if (genreRows.next()) {
+                        do {
+                            Genres genres = new Genres();
+                            genres.setId(genreRows.getInt("genre_id"));
+                            genres.setName(genreRows.getString("genre_name"));
+
+                            genresList.add(genres);
+                        } while (genreRows.next());
+                    }
+
+                    film.setId(filmId);
                     film.setName(filmRows.getString("film_name"));
                     film.setDescription(filmRows.getString("description"));
                     film.setReleaseDate(LocalDate.parse(filmRows.getString("release_date")));
                     film.setDuration(filmRows.getInt("duration"));
                     film.setMpa(mpa);
                     film.setRate(filmRows.getInt("likes"));
+                    film.setGenres(genresList);
 
                     allRatedFilms.add(film);
 
@@ -215,7 +226,7 @@ public class FilmServiceImpl implements FilmService {
                     new FilmMaker(jdbcTemplate));
 
         }
-        return filmsOfSimilarUser;
 
+        return filmsOfSimilarUser;
     }
 }
