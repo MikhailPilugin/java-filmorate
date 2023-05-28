@@ -86,6 +86,11 @@ public class FilmController {
     }
 
 
+    @GetMapping("/users/{id}/recommendations")
+    public List<Film> getRecommendations(@PathVariable Integer id) {
+        return filmServiceImpl.getRecommendations(id);
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleValidationException(final ValidationException e) {
