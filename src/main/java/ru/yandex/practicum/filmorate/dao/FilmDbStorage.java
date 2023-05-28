@@ -193,9 +193,7 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         return allFilms;
-
     }
-
 
     @Override
     public List<Film> getFilmsByDirectorId(int directorId, String sortBy) {
