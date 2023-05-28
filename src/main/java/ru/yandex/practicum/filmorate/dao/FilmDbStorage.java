@@ -193,6 +193,7 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         return allFilms;
+
     }
 
     @Override
@@ -658,5 +659,24 @@ public class FilmDbStorage implements FilmStorage {
         }
 
         return isFilmDelete;
+    }
+
+    @Override
+    public List<Film> getFilmsSortedByPopularity() {
+        String sql = "SELECT F.FILM_ID, " +
+                "       F.FILM_NAME, " +
+                "       F.DESCRIPTION, " +
+                "       F.RELEASE_DATE, " +
+                "       F.DURATION, " +
+                "       M.MPA_ID AS MPA_ID, " +
+                "       M.MPA_NAME AS MPA_NAME, " +
+                "       F.LIKES " +
+                "FROM FILM F " +
+                "         INNER JOIN MPA_RATING M ON F.MPA_ID = M.MPA_ID " +
+                "         LEFT JOIN FILM_LIKES FL ON F.FILM_ID = FL.FILM_ID " +
+                "GROUP BY F.FILM_ID " +
+                "ORDER BY COUNT(FL.FILM_ID) DESC";
+
+        return jdbcTemplate.query(sql, new FilmMaker(jdbcTemplate));
     }
 }
