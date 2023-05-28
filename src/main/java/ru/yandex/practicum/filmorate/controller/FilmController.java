@@ -51,13 +51,14 @@ public class FilmController {
     public Film deleteFilm(@RequestBody @Valid Film film) throws ValidationException {
         return filmDbStorage.deleteFilm(film);
     }
-//films/common?userId=1&friendId=2
-@GetMapping("/films/common")
-public ResponseEntity<List<Film>> getCommonFilms(@RequestParam("userId") Integer userId, @RequestParam("friendId") Integer friendId) {
-    // Здесь происходит обработка запроса по соответствующему методу сервиса
-    List<Film> commonFilms = filmServiceImpl.getCommonFilms(userId, friendId);
-    return ResponseEntity.ok(commonFilms);
-}
+
+    @GetMapping("/films/common")
+    public ResponseEntity<List<Film>> getCommonFilms(@RequestParam("userId") Integer userId, @RequestParam("friendId") Integer friendId) {
+        // Здесь происходит обработка запроса по соответствующему методу сервиса
+        List<Film> commonFilms = filmServiceImpl.getCommonFilms(userId, friendId);
+        return ResponseEntity.ok(commonFilms);
+    }
+
     @PutMapping("/films/{id}/like/{userId}")
     public Film addLike(@PathVariable Integer id, @PathVariable Integer userId) {
         return filmServiceImpl.addLike(id, userId);
@@ -81,7 +82,7 @@ public ResponseEntity<List<Film>> getCommonFilms(@RequestParam("userId") Integer
 
     @GetMapping("/films/search")
     public List<Film> searchFilms(@RequestParam String query, @RequestParam List<String> by) {
-        return filmServiceImpl.searchFilms(query,by);
+        return filmServiceImpl.searchFilms(query, by);
     }
 
 
