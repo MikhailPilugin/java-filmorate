@@ -70,7 +70,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getCommonFilms(Integer userId, Integer friendId) {
-        List <Object> objectList = new ArrayList<>();
+        List<Object> objectList = new ArrayList<>();
         objectList.add(userId);
         objectList.add(friendId);
         String sqlQuery = "SELECT FILM.film_id, film_name, FILM.description, release_date, duration, FILM.mpa_id, MPA_RATING.mpa_name, likes " +
@@ -90,7 +90,7 @@ public class FilmDbStorage implements FilmStorage {
 
 
         List<Film> allFilms = this.jdbcTemplate.query(
-                sqlQuery ,
+                sqlQuery,
                 objectList.toArray(),
                 (resultSet, rowNum) -> {
                     Film film = new Film();
@@ -107,7 +107,7 @@ public class FilmDbStorage implements FilmStorage {
                     Integer mpaId = Integer.parseInt(resultSet.getString("mpa_id"));
 
                     String mpaName = resultSet.getString("mpa_name");
-                    Mpa mpa  = new Mpa(mpaId, mpaName);
+                    Mpa mpa = new Mpa(mpaId, mpaName);
                     film.setMpa(mpa);
                     return film;
                 });
@@ -234,7 +234,7 @@ public class FilmDbStorage implements FilmStorage {
                     Integer mpaId = Integer.parseInt(resultSet.getString("mpa_id"));
 
                     String mpaName = resultSet.getString("mpa_name");
-                    Mpa mpa  = new Mpa(mpaId, mpaName);
+                    Mpa mpa = new Mpa(mpaId, mpaName);
                     film.setMpa(mpa);
                     return film;
                 });
