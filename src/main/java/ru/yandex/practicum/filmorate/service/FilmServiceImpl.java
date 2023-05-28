@@ -157,5 +157,4 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> searchFilms(String query, List<String> by) {
         return filmDbStorage.searchFilms(query.toLowerCase(),by);
     }
-
 }

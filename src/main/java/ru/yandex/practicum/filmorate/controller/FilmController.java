@@ -37,8 +37,8 @@ public class FilmController {
     }
 
     @DeleteMapping("/films/{id}")
-    public Film deleteFilmById(@PathVariable Integer id) throws ValidationException {
-        return filmDbStorage.getFilmById(id);
+    public boolean deleteFilmById(@PathVariable Integer id) throws ValidationException {
+        return filmDbStorage.deleteFilmById(id);
     }
 
     @PostMapping("/films")
