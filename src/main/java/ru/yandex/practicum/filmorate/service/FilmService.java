@@ -10,4 +10,6 @@ public interface FilmService {
     public boolean delLike(Integer id, Integer userId);
 
     public List<Film> getPopularFilms(Integer count);
+
+    List<Film> getRecommendations(Integer userId);
 }
