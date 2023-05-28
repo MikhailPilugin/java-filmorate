@@ -21,4 +21,5 @@ public interface FilmStorage {
 
     List<Film> searchFilms(String query, List<String> by);
 
+    List<Film> getFilmsSortedByPopularity();
 }

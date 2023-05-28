@@ -1,13 +1,15 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.FilmDbStorage;
 import ru.yandex.practicum.filmorate.dao.FilmMaker;
+import ru.yandex.practicum.filmorate.dao.GenresDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.time.LocalDate;
@@ -15,10 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class FilmServiceImpl implements FilmService {
 
     private final FilmDbStorage filmDbStorage;
+    private final GenresDbStorage genresDbStorage;
     private final DirectorStorage directorStorage;
     private final JdbcTemplate jdbcTemplate;
 
@@ -37,7 +41,6 @@ public class FilmServiceImpl implements FilmService {
         if (likesRows.next()) {
             likes = likesRows.getInt("likes");
         }
-
 
         String sqlQueryTwo = "update film set likes = ? where film_id = ?";
         likeIsAdded = jdbcTemplate.update(sqlQueryTwo,
@@ -75,22 +78,53 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getPopularFilms(Integer count, Integer genreId, Integer year) {
-        String sql = "SELECT f.id, " +
-                "f.name, " +
-                "f.description, " +
-                "f.release_date, " +
-                "f.duration," +
-                "m.id as mpa_id, " +
-                "m.name as mpa_name " +
-                "FROM films f " +
-                "INNER JOIN mpa m ON f.mpa_id=m.id " +
-                "LEFT JOIN FILMS_LIKES fl on f.id = fl.film_id " +
-                "GROUP BY f.id " +
-                "ORDER BY COUNT(fl.film_id) DESC " +
-                "LIMIT ?";
-        return jdbcTemplate.query(sql, new Object[]{count},
-                new FilmMaker(jdbcTemplate));
-       }
+        List<Film> selectedPopularFilm = new ArrayList<>();
+
+        if (count <= 0) {
+            log.error("Запрошено не корректное количество фильмов {}", count);
+            throw new IllegalArgumentException("argument is must be above zero");
+        }
+
+        if (year != null && (year >= 1895 && year >= LocalDate.now().getYear())) {
+            log.error("Year parameter value is not correct {}", year);
+            throw new IllegalArgumentException("Year parameter value must be in 1895 - " +
+                    LocalDate.now().getYear() + " period");
+        }
+
+        if (genreId != null && (!genresDbStorage.getAll().containsKey(genreId))) {
+            log.error("genre ID is not correct {}", genreId);
+            throw new IllegalArgumentException("Genre ID parameter value must be in the range from 1 " +
+                    " to " + genresDbStorage.getAll().size());
+        }
+
+        for (Film film : filmDbStorage.getFilmsSortedByPopularity()) {
+
+            if (selectedPopularFilm.size() < count) {
+                if (genreId != null) {
+                    for (Genres genre : film.getGenres()) {
+                        if (genre.getId() == genreId) {
+                            if (year != null) {
+                                if (film.getReleaseDate().getYear() == year) {
+                                    selectedPopularFilm.add(film);
+                                }
+                            } else {
+                                selectedPopularFilm.add(film);
+                            }
+                        }
+                    }
+                } else {
+                    if (year != null) {
+                        if (film.getReleaseDate().getYear() == year) {
+                            selectedPopularFilm.add(film);
+                        }
+                    } else {
+                        selectedPopularFilm.add(film);
+                    }
+                }
+            }
+        }
+        return selectedPopularFilm;
+    }
 
     @Override
     public List<Film> getPopularFilmsWithDirector(int directorId, String sortBy) {
@@ -102,7 +136,6 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> searchFilms(String query, List<String> by) {
         return filmDbStorage.searchFilms(query.toLowerCase(), by);
     }
-
 
     @Override
     public List<Film> getRecommendations(Integer userId) {
@@ -141,9 +174,7 @@ public class FilmServiceImpl implements FilmService {
 
             filmsOfSimilarUser = jdbcTemplate.query(sql, new Object[]{mostSimilarUser, userId},
                     new FilmMaker(jdbcTemplate));
-
         }
         return filmsOfSimilarUser;
-
     }
 }
