@@ -27,7 +27,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public Review addReview(Review review) {
-        if(review.getFilmId() == null || review.getUserId() == null) {
+        if (review.getFilmId() == null || review.getUserId() == null) {
             throw new NullPointerException("FilmId and userId must be not null");
         }
         if (review.getFilmId() < 1 || review.getUserId() < 1) {
