@@ -96,7 +96,7 @@ public class ReviewDbStorage {
     public Review updateReview(Integer reviewId, Review review) {
         log.info("Updating review for reviewId: {}", reviewId);
         String sql = "UPDATE reviews SET review_text = ?, review_is_positive = ?, review_date = NOW() WHERE review_id = ?";
-        try{
+        try {
             jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(), reviewId);
             return getReview(reviewId);
         } catch (Exception e) {
