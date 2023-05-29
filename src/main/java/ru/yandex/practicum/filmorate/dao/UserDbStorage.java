@@ -151,6 +151,39 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
+    @Override
+    public User deleteUserById(Integer id) throws IllegalArgumentException {
+        User user = new User();
+
+        SqlRowSet userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
+
+        if (!userRowsNotFound.next()) {
+            throw new IllegalArgumentException("user not found");
+        }
+
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
+
+        if (userRows.next()) {
+            user.setId(Integer.valueOf(userRows.getString("user_id")));
+            user.setLogin(userRows.getString("login"));
+            user.setName(userRows.getString("user_name"));
+            user.setBirthday(LocalDate.parse(userRows.getString("birthday")));
+            user.setEmail(userRows.getString("email"));
+        }
+
+        String sqlQueryTwo = "delete from friendship where user_id = ?";
+        String sqlQueryThree = "delete from friendship where friend_id = ?";
+
+        jdbcTemplate.update(sqlQueryTwo, id);
+        jdbcTemplate.update(sqlQueryThree, id);
+
+        String sqlQueryOne = "delete from users where user_id = ?";
+
+        jdbcTemplate.update(sqlQueryOne, id);
+
+        return user;
+    }
+
     public Collection<Feed> getUserFeed(int userId) {
         return jdbcTemplate.query("SELECT * FROM user_feed WHERE user_id = ?", this::mapRowToFeed, userId);
     }
