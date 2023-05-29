@@ -4,43 +4,41 @@ import lombok.Data;
 import lombok.NonNull;
 
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 
 @Data
 public class Review {
-    private int id;
+    private int reviewId;
+    private Integer filmId;
+    private Integer userId;
+    @NotBlank @NonNull
+    private String content;
     @NonNull
-    private int filmId;
-    @NonNull
-    private int userId;
-    @NotBlank
-    private String review;
-    @NonNull
-    private int rating;
-    private LocalDate date;
-    private int likes;
-    private int dislikes;
+    private Boolean isPositive;
+
+    private Timestamp date;
+
+    private Integer useful;
 
     public Review() {
     }
 
-    public Review(int id, int filmId, int userId, String review, LocalDate date, int rating) {
-        this.id = id;
+    public Review(int reviewId, int filmId, int userId, String content, Timestamp date, boolean isPositive) {
+        this.reviewId = reviewId;
         this.filmId = filmId;
         this.userId = userId;
-        this.review = review;
+        this.content = content;
         this.date = date;
-        this.rating = rating;
+        this.isPositive = isPositive;
     }
 
-    public Review(int id, int filmId, int userId, String review, int rating, LocalDate date, int likes, int dislikes) {
-        this.id = id;
+    public Review(int reviewId, int filmId, int userId, String content, Timestamp date, boolean isPositive, Integer useful) {
+        this.reviewId = reviewId;
         this.filmId = filmId;
         this.userId = userId;
-        this.review = review;
+        this.content = content;
         this.date = date;
-        this.rating = rating;
-        this.likes = likes;
-        this.dislikes = dislikes;
+        this.isPositive = isPositive;
+        this.useful = useful;
     }
 }

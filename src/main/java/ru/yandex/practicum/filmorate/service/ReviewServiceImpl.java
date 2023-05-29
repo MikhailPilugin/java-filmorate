@@ -21,9 +21,17 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    public List<Review> getAllReviews(Integer count) {
+        return reviewDbStorage.getAllReviews(count);
+    }
+
+    @Override
     public Review addReview(Review review) {
-        if (review.getRating() < 1 || review.getRating() > 5) {
-            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        if(review.getFilmId() == null || review.getUserId() == null) {
+            throw new NullPointerException("FilmId and userId must be not null");
+        }
+        if (review.getFilmId() < 1 || review.getUserId() < 1) {
+            throw new IllegalArgumentException("FilmId and userId must be greater than 0");
         }
         return reviewDbStorage.addReview(review.getFilmId(), review.getUserId(), review);
     }
@@ -39,8 +47,8 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<Review> getAllReviewsOfFilm(Integer filmId) {
-        return reviewDbStorage.getAllReviewsOfFilm(filmId);
+    public List<Review> getAllReviewsOfFilm(Integer filmId, Integer count) {
+        return reviewDbStorage.getAllReviewsOfFilm(filmId, count);
     }
 
     @Override
@@ -49,7 +57,13 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public boolean likeReview(Integer reviewId, Integer userId, Boolean isLike) {
-        return reviewDbStorage.likeReview(reviewId, userId, isLike);
+    public Review likeReview(Integer reviewId, Integer userId) {
+        return reviewDbStorage.likeReview(reviewId, userId, true);
     }
+
+    @Override
+    public Review dislikeReview(Integer reviewId, Integer userId) {
+        return reviewDbStorage.dislikeReview(reviewId, userId, false);
+    }
+
 }

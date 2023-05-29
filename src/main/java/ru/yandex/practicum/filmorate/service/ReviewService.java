@@ -13,10 +13,14 @@ public interface ReviewService {
 
     boolean deleteReview(Integer reviewId);
 
-    List<Review> getAllReviewsOfFilm(Integer filmId);
+    List<Review> getAllReviewsOfFilm(Integer filmId, Integer count);
 
     List<Review> getAllReviewsOfUser(Integer userId);
 
-    boolean likeReview(Integer reviewId, Integer userId, Boolean isLike);
+    List<Review> getAllReviews(Integer count);
+
+    Review likeReview(Integer reviewId, Integer userId);
+
+    Review dislikeReview(Integer reviewId, Integer userId);
 
 }
