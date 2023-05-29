@@ -16,20 +16,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmorateApplicationTests {
-	private final UserDbStorage userStorage;
+    private final UserDbStorage userStorage;
 
-	@Test
-	public void testFindUserById() {
+    @Test
+    public void testFindUserById() {
 
-		User users = new User();
-		users.setId(1);
+        User users = new User();
+        users.setId(1);
 
-		Optional<User> userOptional = Optional.of(users);
+        Optional<User> userOptional = Optional.of(users);
 
-		assertThat(userOptional)
-				.isPresent()
-				.hasValueSatisfying(user ->
-						assertThat(user).hasFieldOrPropertyWithValue("id", 1)
-				);
-	}
+        assertThat(userOptional)
+                .isPresent()
+                .hasValueSatisfying(user ->
+                        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
+                );
+    }
 }
