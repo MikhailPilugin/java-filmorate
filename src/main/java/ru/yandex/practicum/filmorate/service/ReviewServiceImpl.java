@@ -21,7 +21,10 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<Review> getAllReviews(Integer count) {
+    public List<Review> getAllReviews(Integer filmId, Integer count) {
+        if (filmId != null) {
+            return reviewDbStorage.getAllReviewsOfFilm(filmId, count);
+        }
         return reviewDbStorage.getAllReviews(count);
     }
 
@@ -44,11 +47,6 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public boolean deleteReview(Integer reviewId) {
         return reviewDbStorage.deleteReview(reviewId);
-    }
-
-    @Override
-    public List<Review> getAllReviewsOfFilm(Integer filmId, Integer count) {
-        return reviewDbStorage.getAllReviewsOfFilm(filmId, count);
     }
 
     @Override
