@@ -11,7 +11,8 @@ public class Review {
     private int reviewId;
     private Integer filmId;
     private Integer userId;
-    @NotBlank @NonNull
+    @NotBlank
+    @NonNull
     private String content;
     @NonNull
     private Boolean isPositive;

@@ -8,6 +8,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserFeedStorage;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -17,6 +18,7 @@ import java.util.*;
 public class UserServiceImpl implements UserService {
     private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserDbStorage userDbStorage;
+    private final UserFeedStorage userFeedStorage;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -47,6 +49,8 @@ public class UserServiceImpl implements UserService {
             isFriendsAdd = true;
         }
 
+        userFeedStorage.friendEvent(id, friendId, "ADD");
+
         return isFriendsAdd;
     }
 
@@ -72,6 +76,8 @@ public class UserServiceImpl implements UserService {
         if (status > 0) {
             isFriendsDelete = true;
         }
+
+        userFeedStorage.friendEvent(id, friendId, "REMOVE");
 
         return isFriendsDelete;
     }

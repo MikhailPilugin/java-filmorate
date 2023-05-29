@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.dao.GenresDbStorage;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genres;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.UserFeedStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class FilmServiceImpl implements FilmService {
     private final GenresDbStorage genresDbStorage;
     private final DirectorStorage directorStorage;
     private final JdbcTemplate jdbcTemplate;
+    private final UserFeedStorage userFeedStorage;
 
     @Override
     public Film addLike(int filmId, int userId) {
@@ -33,6 +35,9 @@ public class FilmServiceImpl implements FilmService {
         Set<Integer> likes = filmToLike.getLikes();
         likes.add(userId);
         filmDbStorage.addFilmLikeToRepo(filmToLike, userId);
+
+        userFeedStorage.likeEvent(userId, filmId, "ADD");
+
         return filmToLike;
     }
 
@@ -58,6 +63,8 @@ public class FilmServiceImpl implements FilmService {
         likeIsDeleted = jdbcTemplate.update(sqlQueryTwo,
                 likes - 1,
                 id) > 0;
+
+        userFeedStorage.likeEvent(userId, id, "REMOVE");
 
         return likeIsDeleted;
     }
