@@ -18,18 +18,20 @@ public class UserFeedDbStorage implements UserFeedStorage {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void likeEvent(int user_id, int entity_id, String operation) {
-        timestamp = Instant.now().getEpochSecond() * 1000 + (long) (Instant.now().getNano() / Math.pow(10, 6));
-        jdbcTemplate.update(sqlRequest, user_id, entity_id, "LIKE", operation, timestamp);
+    public void likeEvent(int userId, int entityId, String operation) {
+        event(userId, entityId, operation, "LIKE");
     }
 
-    public void friendEvent(int user_id, int entity_id, String operation) {
-        timestamp = Instant.now().getEpochSecond() * 1000 + (long) (Instant.now().getNano() / Math.pow(10, 6));
-        jdbcTemplate.update(sqlRequest, user_id, entity_id, "FRIEND", operation, timestamp);
+    public void friendEvent(int userId, int entityId, String operation) {
+        event(userId, entityId, operation, "FRIEND");
     }
 
-    public void reviewEvent(int user_id, int entity_id, String operation) {
+    public void reviewEvent(int userId, int entityId, String operation) {
+        event(userId, entityId, operation, "REVIEW");
+    }
+
+    private void event(int userId, int entityId, String operation, String eventType) {
         timestamp = Instant.now().getEpochSecond() * 1000 + (long) (Instant.now().getNano() / Math.pow(10, 6));
-        jdbcTemplate.update(sqlRequest, user_id, entity_id, "REVIEW", operation, timestamp);
+        jdbcTemplate.update(sqlRequest, userId, entityId, eventType, operation, timestamp);
     }
 }
