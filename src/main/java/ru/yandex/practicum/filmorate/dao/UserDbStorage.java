@@ -184,7 +184,8 @@ public class UserDbStorage implements UserStorage {
         return user;
     }
 
-    public Collection<Feed> getUserFeed(int userId) {
+    public Collection<Feed> getUserFeed(int userId) throws IllegalArgumentException {
+        getUserById(userId);
         return jdbcTemplate.query("SELECT * FROM user_feed WHERE user_id = ?", this::mapRowToFeed, userId);
     }
 
@@ -195,7 +196,7 @@ public class UserDbStorage implements UserStorage {
                 .entityId(rs.getInt("entity_id"))
                 .eventType(rs.getString("event_type"))
                 .operation(rs.getString("operation"))
-                .timestamp(rs.getInt("timestamp"))
+                .timestamp(rs.getLong("timestamp"))
                 .build();
     }
 

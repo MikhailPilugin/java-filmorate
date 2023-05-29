@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.UserFeedStorage;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -20,9 +21,11 @@ public class ReviewDbStorage {
     private final Logger log = LoggerFactory.getLogger(ReviewDbStorage.class);
 
     private final JdbcTemplate jdbcTemplate;
+    private final UserFeedStorage userFeedStorage;
 
-    public ReviewDbStorage(JdbcTemplate jdbcTemplate) {
+    public ReviewDbStorage(JdbcTemplate jdbcTemplate, UserFeedStorage userFeedStorage) {
         this.jdbcTemplate = jdbcTemplate;
+        this.userFeedStorage = userFeedStorage;
     }
 
     public Review getReview(Integer reviewId) {
@@ -86,6 +89,9 @@ public class ReviewDbStorage {
             Map<String, Object> keys = keyHolder.getKeys();
             Timestamp reviewDate = (Timestamp) keys.get("review_date");
             Integer reviewId = (Integer) keys.get("review_id");
+
+            userFeedStorage.reviewEvent(userId, reviewId, "ADD");
+
             return new Review(reviewId, filmId, userId, review.getContent(), reviewDate, review.getIsPositive(), 0);
         } catch (Exception e) {
             log.error("Error adding review for filmId: {}, userId: {}", filmId, userId, e);
@@ -96,7 +102,10 @@ public class ReviewDbStorage {
     public Review updateReview(Integer reviewId, Review review) {
         log.info("Updating review for reviewId: {}", reviewId);
         String sql = "UPDATE reviews SET review_text = ?, review_is_positive = ?, review_date = NOW() WHERE review_id = ?";
+        String sqlUserId = "SELECT user_id FROM reviews WHERE review_id = ?";
+        int userId = jdbcTemplate.queryForObject(sqlUserId, Integer.class, reviewId);
         try {
+            userFeedStorage.reviewEvent(userId, reviewId, "UPDATE");
             jdbcTemplate.update(sql, review.getContent(), review.getIsPositive(), reviewId);
             return getReview(reviewId);
         } catch (Exception e) {
@@ -109,9 +118,14 @@ public class ReviewDbStorage {
         log.info("Deleting review for reviewId: {}", reviewId);
         String sqlReviewLikes = "DELETE FROM review_likes WHERE review_id = ?";
         String sqlReview = "DELETE FROM reviews WHERE review_id = ?";
+        String sqlUserId = "SELECT user_id FROM reviews WHERE review_id = ?";
+        int userId = jdbcTemplate.queryForObject(sqlUserId, Integer.class, reviewId);
+
         try {
             jdbcTemplate.update(sqlReviewLikes, reviewId);
             jdbcTemplate.update(sqlReview, reviewId);
+
+            userFeedStorage.reviewEvent(userId, reviewId, "REMOVE");
         } catch (Exception e) {
             log.error("Error deleting review for reviewId: {}", reviewId, e);
             throw e;

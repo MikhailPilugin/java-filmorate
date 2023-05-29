@@ -10,7 +10,7 @@ public class Feed {
     private int userId;
     private int entityId;
 
-    private int timestamp;
+    private long timestamp;
 
     private String eventType;
     private String operation;
