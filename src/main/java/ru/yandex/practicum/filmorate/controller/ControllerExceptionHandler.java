@@ -16,7 +16,6 @@ public class ControllerExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> notFoundException(NotFoundException ex) {
         String erroMessage = ex.getMessage() != null ? ex.getMessage() : "the object does not exists";
-
         return Map.of("not found exception ", erroMessage);
     }
 
