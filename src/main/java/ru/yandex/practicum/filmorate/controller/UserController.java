@@ -48,6 +48,11 @@ public class UserController {
         return userDbStorage.deleteUser(user);
     }
 
+    @DeleteMapping("/users/{id}")
+    public User deleteUserById(@PathVariable Integer id) {
+        return userDbStorage.deleteUserById(id);
+    }
+
     @PutMapping("/users/{id}/friends/{friendId}")
     public boolean addFriend(@PathVariable Integer id, @PathVariable Integer friendId) throws ValidationException {
         return userServiceImpl.addFriend(id, friendId);
