@@ -21,7 +21,10 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
-    public List<Review> getAllReviews(Integer count) {
+    public List<Review> getAllReviews(Integer filmId, Integer count) {
+        if (filmId != null) {
+            return reviewDbStorage.getAllReviewsOfFilm(filmId, count);
+        }
         return reviewDbStorage.getAllReviews(count);
     }
 
