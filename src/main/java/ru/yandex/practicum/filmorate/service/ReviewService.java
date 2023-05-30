@@ -7,6 +7,8 @@ import java.util.List;
 public interface ReviewService {
     Review getReviewById(Integer reviewId);
 
+    List<Review> getAllReviews(Integer count);
+
     Review addReview(Review review);
 
     Review updateReview(Integer reviewId, Review review);
@@ -15,7 +17,7 @@ public interface ReviewService {
 
     List<Review> getAllReviewsOfUser(Integer userId);
 
-    List<Review> getAllReviews(Integer filmId, Integer count);
+    List<Review> getAllReviewsOfFilm(Integer filmId, Integer count);
 
     Review likeReview(Integer reviewId, Integer userId);
 
