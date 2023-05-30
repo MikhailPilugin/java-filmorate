@@ -16,11 +16,13 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public Director getDirectorById(int directorId) {
+        log.debug("Director whit id = \"{}\" ", directorId);
         return directorStorage.getDirectorFromRepoById(directorId);
     }
 
     @Override
     public List<Director> getAllDirectors() {
+        log.debug("There are {} directors in filmorate", directorStorage.getAllDirectors().size());
         return directorStorage.getAllDirectors();
     }
 
@@ -36,6 +38,7 @@ public class DirectorServiceImpl implements DirectorService {
 
     @Override
     public boolean deleteDirectorById(int directorId) {
+        log.debug("Director whit id = \"{}\" deleted", directorId);
         return directorStorage.deleteDirectorById(directorId);
     }
 }

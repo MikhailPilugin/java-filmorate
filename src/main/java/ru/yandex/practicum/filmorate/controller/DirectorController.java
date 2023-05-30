@@ -19,24 +19,19 @@ public class DirectorController {
 
     @GetMapping("/{directorId}")
     public Director getDirectorById(@PathVariable int directorId) {
-        var directorById = directorService.getDirectorById(directorId);
-        log.debug("Director whit id = \"{}\" ", directorId);
-        return directorById;
+        return directorService.getDirectorById(directorId);
     }
 
     @DeleteMapping("/{directorId}")
     public Director deleteDirectorById(@PathVariable int directorId) {
         Director director = directorService.getDirectorById(directorId);
         directorService.deleteDirectorById(directorId);
-        log.debug("Director whit id = \"{}\" deleted", directorId);
         return director;
     }
 
     @GetMapping
     public List<Director> getAllDirectors() {
-        var directors = directorService.getAllDirectors();
-        log.debug("There are {} directors in filmorate", directorService.getAllDirectors().size());
-        return directors;
+        return directorService.getAllDirectors();
     }
 
     @PostMapping
