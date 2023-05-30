@@ -25,7 +25,7 @@ public class DirectorController {
     }
 
     @DeleteMapping("/{directorId}")
-    public Director deliteDirectorById(@PathVariable int directorId) {
+    public Director deleteDirectorById(@PathVariable int directorId) {
         Director director = directorService.getDirectorById(directorId);
         directorService.deleteDirectorById(directorId);
         log.debug("Director whit id = \"{}\" deleted", directorId);
@@ -41,14 +41,11 @@ public class DirectorController {
 
     @PostMapping
     public Director addDirector(@Valid @RequestBody Director director) {
-        var directorAdded = directorService.addDirector(director);
-
-        return directorAdded;
+        return directorService.addDirector(director);
     }
 
     @PutMapping
     public Director updateDirector(@Valid @RequestBody Director director) {
-        var directorUpdated = directorService.updateDirector(director);
-        return directorUpdated;
+        return directorService.updateDirector(director);
     }
 }
