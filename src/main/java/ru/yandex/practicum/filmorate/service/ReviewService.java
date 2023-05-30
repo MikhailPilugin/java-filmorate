@@ -13,11 +13,9 @@ public interface ReviewService {
 
     boolean deleteReview(Integer reviewId);
 
-    List<Review> getAllReviewsOfFilm(Integer filmId, Integer count);
-
     List<Review> getAllReviewsOfUser(Integer userId);
 
-    List<Review> getAllReviews(Integer count);
+    List<Review> getAllReviews(Integer filmId, Integer count);
 
     Review likeReview(Integer reviewId, Integer userId);
 
