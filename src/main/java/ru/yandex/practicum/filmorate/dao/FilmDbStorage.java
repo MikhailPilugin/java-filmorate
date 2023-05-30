@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,7 +8,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exceptions.DubleException;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -32,20 +30,9 @@ import java.util.stream.Collectors;
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
-    @SneakyThrows
     @Override
     public Film addFilmLikeToRepo(Film filmToLike, int userId) {
 
-        String checkQuery = "SELECT COUNT(*) FROM FILM_LIKES WHERE FILM_ID = ? AND USER_ID = ?";
-        int count = jdbcTemplate.queryForObject(checkQuery, new Object[]{filmToLike.getId(), userId}, Integer.class);
-
-        if (count > 0) {
-            throw new DubleException("Like to film '" +
-                    filmToLike.getName() +
-                    "' from user id='" +
-                    userId +
-                    "' already exists");
-        }
         KeyHolder keyHolder = new GeneratedKeyHolder();
         String sqlQuery = "INSERT INTO FILM_LIKES (FILM_ID, USER_ID)" +
                 "SELECT ?, ?" +
@@ -635,7 +622,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film deleteFilm(Film film) {
-        String sqlQuery = "delete from film where id = ?";
+        String sqlQuery = "delete from film where film_id = ?";
         jdbcTemplate.update(sqlQuery, film.getId());
 
         return film;
