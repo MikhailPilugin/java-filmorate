@@ -48,8 +48,8 @@ public class FilmMaker implements RowMapper<Film> {
                 new Object[]{id},
                 (resultSet, rowNum2) -> {
                     Director director = new Director();
-                    director.setId(Integer.parseInt(resultSet.getString("GENRE_ID")));
-                    director.setName(resultSet.getString("GENRE_NAME"));
+                    director.setId(Integer.parseInt(resultSet.getString("DIRECTOR_ID")));
+                    director.setName(resultSet.getString("DIRECTOR_NAME"));
                     return director;
                 });
 
