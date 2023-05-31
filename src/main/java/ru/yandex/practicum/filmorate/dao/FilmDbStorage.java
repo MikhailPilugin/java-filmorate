@@ -98,12 +98,6 @@ public class FilmDbStorage implements FilmStorage {
                     film.setMpa(mpa);
                     return film;
                 });
-        for (Film film : allFilms) {
-            if (film != null) {
-                takeGenreFromDb(film);
-                takeDirectorsFromDb(film);
-            }
-        }
         return allFilms;
     }
 
@@ -313,7 +307,6 @@ public class FilmDbStorage implements FilmStorage {
                     genre.setId(genreId);
                     genre.setName(genreName);
                     genresList.add(genre);
-                    //     film.setGenres(genresList);
                 }
 
                 film.setId(Integer.parseInt(filmRows.getString("film_id")));
