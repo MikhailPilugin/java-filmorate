@@ -24,7 +24,7 @@ public class ReviewController {
 
     @GetMapping("/reviews")
     public Collection<Review> getReviews(@RequestParam(required = false) Integer filmId, @RequestParam(required = false, defaultValue = "10") Integer count) {
-        return reviewService.getAllReviews(filmId, count);
+        return reviewService.getAllReviewsOfFilm(filmId, count);
     }
 
     @GetMapping("/reviews/{reviewId}")

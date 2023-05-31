@@ -91,19 +91,13 @@ public class FilmDbStorage implements FilmStorage {
                     if (likes != null) {
                         film.setLikes(Integer.parseInt(resultSet.getString("likes")));
                     }
-                    Integer mpaId = Integer.parseInt(resultSet.getString("mpa_id"));
+                    int mpaId = Integer.parseInt(resultSet.getString("mpa_id"));
 
                     String mpaName = resultSet.getString("mpa_name");
                     Mpa mpa = new Mpa(mpaId, mpaName);
                     film.setMpa(mpa);
                     return film;
                 });
-        for (Film film : allFilms) {
-            if (film != null) {
-                takeGenreFromDb(film);
-                takeDirectorsFromDb(film);
-            }
-        }
         return allFilms;
     }
 
@@ -160,11 +154,8 @@ public class FilmDbStorage implements FilmStorage {
                     film.setReleaseDate(resultSet.getDate("release_date").toLocalDate());
 
                     Integer likes = resultSet.getInt("likes");
-                    if (likes != null) {
-                        film.setLikes(likes);
-                    }
-
-                    Integer mpaId = resultSet.getInt("mpa_id");
+                    film.setLikes(likes);
+                    int mpaId = resultSet.getInt("mpa_id");
                     String mpaName = resultSet.getString("mpa_name");
                     Mpa mpa = new Mpa(mpaId, mpaName);
                     film.setMpa(mpa);
@@ -217,7 +208,7 @@ public class FilmDbStorage implements FilmStorage {
                     if (likes != null) {
                         film.setLikes(Integer.parseInt(resultSet.getString("likes")));
                     }
-                    Integer mpaId = Integer.parseInt(resultSet.getString("mpa_id"));
+                    int mpaId = Integer.parseInt(resultSet.getString("mpa_id"));
 
                     String mpaName = resultSet.getString("mpa_name");
                     Mpa mpa = new Mpa(mpaId, mpaName);
@@ -316,10 +307,9 @@ public class FilmDbStorage implements FilmStorage {
                     genre.setId(genreId);
                     genre.setName(genreName);
                     genresList.add(genre);
-                    //     film.setGenres(genresList);
                 }
 
-                film.setId(Integer.valueOf(filmRows.getString("film_id")));
+                film.setId(Integer.parseInt(filmRows.getString("film_id")));
                 film.setName(filmRows.getString("film_name"));
                 film.setDescription(filmRows.getString("description"));
                 film.setReleaseDate(LocalDate.parse(filmRows.getString("release_date")));
