@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -7,21 +8,19 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.UserFeedStorage;
 
 import java.time.LocalDate;
 import java.util.*;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserDbStorage userDbStorage;
+    private final UserFeedStorage userFeedStorage;
 
     private final JdbcTemplate jdbcTemplate;
-
-    public UserServiceImpl(UserDbStorage userDbStorage, JdbcTemplate jdbcTemplate) {
-        this.userDbStorage = userDbStorage;
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public boolean addFriend(int id, int friendId) {
@@ -50,6 +49,8 @@ public class UserServiceImpl implements UserService {
             isFriendsAdd = true;
         }
 
+        userFeedStorage.friendEvent(id, friendId, "ADD");
+
         return isFriendsAdd;
     }
 
@@ -76,6 +77,8 @@ public class UserServiceImpl implements UserService {
             isFriendsDelete = true;
         }
 
+        userFeedStorage.friendEvent(id, friendId, "REMOVE");
+
         return isFriendsDelete;
     }
 
@@ -90,7 +93,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("");
         }
 
-        // выполняем запрос к базе данных.
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from friendship where user_id = ?", id);
 
         if (userRows.next()) {
@@ -137,7 +139,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("");
         }
 
-        // выполняем запрос к базе данных.
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT * FROM friendship WHERE friend_id IN (" +
                 " SELECT friend_id FROM friendship WHERE user_id = ? INTERSECT " +
                 "SELECT friend_id FROM friendship WHERE user_id = ? )", id, otherId);

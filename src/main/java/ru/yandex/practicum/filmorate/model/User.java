@@ -30,23 +30,4 @@ public class User {
         this.friends = new HashSet<>();
     }
 
-    public int setFriends(Integer id) {
-        int status = 1;
-
-        if (id != null) {
-            friends.add(id);
-            status = 0;
-        }
-        return status;
-    }
-
-    public int removeFriends(Integer id) {
-        int status = 1;
-
-        if (id != null) {
-            friends.remove(id);
-            status = 0;
-        }
-        return status;
-    }
 }

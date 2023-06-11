@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dao.UserDbStorage;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserServiceImpl;
 
@@ -48,6 +49,11 @@ public class UserController {
         return userDbStorage.deleteUser(user);
     }
 
+    @DeleteMapping("/users/{id}")
+    public User deleteUserById(@PathVariable Integer id) {
+        return userDbStorage.deleteUserById(id);
+    }
+
     @PutMapping("/users/{id}/friends/{friendId}")
     public boolean addFriend(@PathVariable Integer id, @PathVariable Integer friendId) throws ValidationException {
         return userServiceImpl.addFriend(id, friendId);
@@ -66,6 +72,11 @@ public class UserController {
     @GetMapping("/users/{id}/friends/common/{otherId}")
     public Collection<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userServiceImpl.getCommonFriends(id, otherId);
+    }
+
+    @GetMapping("/users/{userId}/feed")
+    public Collection<Feed> getUserFeed(@PathVariable int userId) {
+        return userDbStorage.getUserFeed(userId);
     }
 
     @ExceptionHandler

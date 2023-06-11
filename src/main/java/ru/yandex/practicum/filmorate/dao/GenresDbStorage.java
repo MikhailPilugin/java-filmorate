@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.dao;
 
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,14 +12,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Repository
+@RequiredArgsConstructor
 public class GenresDbStorage {
     private final Logger log = LoggerFactory.getLogger(GenresDbStorage.class);
 
     private final JdbcTemplate jdbcTemplate;
-
-    public GenresDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     public Map<Integer, Genres> getAll() {
         Map<Integer, Genres> genresMap = new HashMap<>();
