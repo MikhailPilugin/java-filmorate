@@ -8,11 +8,15 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exceptions.ValidationException;
+import ru.yandex.practicum.filmorate.model.Feed;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -146,4 +150,54 @@ public class UserDbStorage implements UserStorage {
 
         return user;
     }
+
+    @Override
+    public User deleteUserById(Integer id) throws IllegalArgumentException {
+        User user = new User();
+
+        SqlRowSet userRowsNotFound = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
+
+        if (!userRowsNotFound.next()) {
+            throw new IllegalArgumentException("user not found");
+        }
+
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet("select * from users where user_id = ?", id);
+
+        if (userRows.next()) {
+            user.setId(Integer.valueOf(userRows.getString("user_id")));
+            user.setLogin(userRows.getString("login"));
+            user.setName(userRows.getString("user_name"));
+            user.setBirthday(LocalDate.parse(userRows.getString("birthday")));
+            user.setEmail(userRows.getString("email"));
+        }
+
+        String sqlQueryTwo = "delete from friendship where user_id = ?";
+        String sqlQueryThree = "delete from friendship where friend_id = ?";
+
+        jdbcTemplate.update(sqlQueryTwo, id);
+        jdbcTemplate.update(sqlQueryThree, id);
+
+        String sqlQueryOne = "delete from users where user_id = ?";
+
+        jdbcTemplate.update(sqlQueryOne, id);
+
+        return user;
+    }
+
+    public Collection<Feed> getUserFeed(int userId) throws IllegalArgumentException {
+        getUserById(userId);
+        return jdbcTemplate.query("SELECT * FROM user_feed WHERE user_id = ?", this::mapRowToFeed, userId);
+    }
+
+    private Feed mapRowToFeed(ResultSet rs, int rowNum) throws SQLException {
+        return Feed.builder()
+                .userId(rs.getInt("user_id"))
+                .eventId(rs.getInt("event_id"))
+                .entityId(rs.getInt("entity_id"))
+                .eventType(rs.getString("event_type"))
+                .operation(rs.getString("operation"))
+                .timestamp(rs.getLong("timestamp"))
+                .build();
+    }
+
 }
